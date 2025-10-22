@@ -1,4 +1,10 @@
-<!-- PiouPiouMatic — Interface de diagnostic médical RP (vue de face, cumul des blessures) -->
+<!-- PiouPiouMatic — Interface de diagnostic médical RP
+     - Image PNG unisexe (remplacez `assets/body_unisex.png` par votre image PNG)
+     - Pas d'historique, pas d'import/export
+     - Clic sur une zone ouvre une boîte modale pour ajouter une blessure
+     - Les blessures s'incrémentent automatiquement dans la colonne de droite,
+       groupées par partie du corps, avec traitement simplifié
+-->
 <!doctype html>
 <html lang="fr">
   <head>
@@ -7,198 +13,217 @@
     <title>PiouPiouMatic — Diagnostic médical RP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      .zone { cursor: pointer; transition: fill 0.12s ease; }
-      .zone:hover { fill: rgba(99,102,241,0.12); }
-      .zone.selected { fill: rgba(239,68,68,0.18); }
-      .svg-wrapper { max-width: 460px; }
+      .zone { cursor: pointer; }
+      .zone-hover { fill: rgba(99,102,241,0.12); }
+      .zone-selected { fill: rgba(239,68,68,0.18); }
+      .body-wrap{max-width:680px}
+      /* Ensure overlay sits on the image */
+      .overlay { position:absolute; left:0; top:0; pointer-events:none; }
+      .hotspot { pointer-events:auto; }
     </style>
   </head>
   <body class="bg-gray-50 text-gray-800">
     <div class="max-w-6xl mx-auto p-6">
       <header class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-semibold">PiouPiouMatic — Diagnostic médical RP</h1>
-        <div class="text-sm text-gray-500">Vue de face • Cumul des blessures • JSON local</div>
+        <div class="text-sm text-gray-500">Vue de face • Image PNG unisexe • Sans historique</div>
       </header>
 
       <main class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Left: image + overlay hotspots -->
         <section class="md:col-span-1 bg-white p-4 rounded-lg shadow">
-          <h2 class="font-medium mb-2">Carte du corps (vue de face)</h2>
-          <div class="svg-wrapper mx-auto">
-            <svg viewBox="0 0 200 520" xmlns="http://www.w3.org/2000/svg">
-              <ellipse id="head" class="zone" cx="100" cy="40" rx="30" ry="28" fill="#F8F8F8" stroke="#ddd" stroke-width="1"/>
-              <rect id="neck" class="zone" x="86" y="65" width="28" height="12" fill="#F8F8F8" stroke="#ddd" stroke-width="1"/>
-              <path id="chest" class="zone" d="M60 85 C60 85,48 150,60 210 C60 260,140 260,140 210 C152 150,140 85,140 85 Z" fill="#F8F8F8" stroke="#ddd" stroke-width="1"/>
-              <rect id="abdomen" class="zone" x="72" y="210" width="56" height="70" fill="#F8F8F8" stroke="#ddd" stroke-width="1"/>
-              <path id="left_arm" class="zone" d="M60 110 C20 120,10 180,40 230 L54 218 C40 190,58 150,60 110 Z" fill="#F8F8F8" stroke="#ddd" stroke-width="1"/>
-              <path id="right_arm" class="zone" d="M140 110 C180 120,190 180,160 230 L146 218 C160 190,142 150,140 110 Z" fill="#F8F8F8" stroke="#ddd" stroke-width="1"/>
-              <path id="left_leg" class="zone" d="M86 280 L86 420 C86 460,110 500,96 500 C80 500,70 470,70 440 L70 300 Z" fill="#F8F8F8" stroke="#ddd" stroke-width="1"/>
-              <path id="right_leg" class="zone" d="M114 280 L114 420 C114 460,90 500,104 500 C120 500,130 470,130 440 L130 300 Z" fill="#F8F8F8" stroke="#ddd" stroke-width="1"/>
-              <ellipse id="pelvis" class="zone" cx="100" cy="300" rx="26" ry="14" fill="#F8F8F8" stroke="#ddd" stroke-width="1"/>
+          <h2 class="font-medium mb-2">Carte du corps (clique une zone)</h2>
+
+          <div class="relative body-wrap mx-auto" style="width:320px;">
+            <!-- Replace the src with your PNG unisexe (recommended size: ~320x800 or adjust viewBox) -->
+            <img id="bodyImg" src="assets/body_unisex.png" alt="Corps unisexe" class="w-full rounded" />
+
+            <!-- SVG overlay (transparent) — coordinates approximate the image above. Keep pointer-events none on svg, but hotspots set pointer-events:auto -->
+            <svg id="overlay" class="overlay" viewBox="0 0 200 520" width="100%" height="260%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <!-- hotspots (invisible shapes) with class hotspot -->
+              <ellipse id="head" class="hotspot" cx="100" cy="40" rx="30" ry="28" fill="transparent" stroke="transparent" />
+              <rect id="neck" class="hotspot" x="86" y="65" width="28" height="12" fill="transparent" stroke="transparent" />
+              <path id="chest" class="hotspot" d="M60 85 C60 85,48 150,60 210 C60 260,140 260,140 210 C152 150,140 85,140 85 Z" fill="transparent" stroke="transparent" />
+              <rect id="abdomen" class="hotspot" x="72" y="210" width="56" height="70" fill="transparent" stroke="transparent" />
+              <ellipse id="pelvis" class="hotspot" cx="100" cy="300" rx="26" ry="14" fill="transparent" stroke="transparent" />
+              <path id="left_arm" class="hotspot" d="M60 110 C20 120,10 180,40 230 L54 218 C40 190,58 150,60 110 Z" fill="transparent" stroke="transparent" />
+              <path id="right_arm" class="hotspot" d="M140 110 C180 120,190 180,160 230 L146 218 C160 190,142 150,140 110 Z" fill="transparent" stroke="transparent" />
+              <path id="left_leg" class="hotspot" d="M86 280 L86 420 C86 460,110 500,96 500 C80 500,70 470,70 440 L70 300 Z" fill="transparent" stroke="transparent" />
+              <path id="right_leg" class="hotspot" d="M114 280 L114 420 C114 460,90 500,104 500 C120 500,130 470,130 440 L130 300 Z" fill="transparent" stroke="transparent" />
             </svg>
+
           </div>
 
-          <div class="mt-4">
-            <label class="block text-sm font-medium mb-1">Type de traumatisme</label>
-            <select id="injuryType" class="w-full border rounded p-2">
-              <option value="arme_feu">Blessure par arme à feu</option>
-              <option value="arme_blanche">Blessure par arme blanche</option>
-              <option value="contondante">Traumatisme contondant</option>
-              <option value="avp">Accident de la voie publique (AVP)</option>
-              <option value="chute">Chute</option>
-            </select>
-          </div>
-
-          <div class="mt-4">
-            <label class="block text-sm font-medium mb-1">Échelle de douleur : <span id="painLabel" class="font-semibold">5</span>/10</label>
-            <input id="painScale" type="range" min="1" max="10" value="5" class="w-full" />
-          </div>
-
-          <div class="mt-4 flex gap-2">
-            <button id="generateBtn" class="flex-1 bg-indigo-600 text-white py-2 rounded hover:opacity-95">Ajouter blessure</button>
-            <button id="finalDiagnosisBtn" class="bg-green-600 text-white px-3 rounded">Diagnostic final</button>
-            <button id="clearSelection" class="bg-gray-200 px-3 rounded">Effacer sélection</button>
-          </div>
         </section>
 
+        <!-- Middle: modal controls -->
         <section class="md:col-span-1 bg-white p-4 rounded-lg shadow">
-          <h2 class="font-medium mb-2">Diagnostic cumulé</h2>
-          <div id="diagnosisBox" class="min-h-[120px] p-3 border rounded bg-gray-50 text-sm whitespace-pre-wrap"></div>
+          <h2 class="font-medium mb-2">Ajout de blessure</h2>
+          <p class="text-sm text-gray-600 mb-3">Clique sur une partie du corps pour ouvrir la boîte d'ajout.</p>
+
+          <div id="lastAction" class="text-sm text-gray-500">Aucune action récente.</div>
 
           <div class="mt-4">
-            <h3 class="font-medium mb-2">Historique local</h3>
-            <div class="overflow-auto max-h-64">
-              <table id="historyTable" class="w-full text-sm">
-                <thead class="text-left text-gray-600"><tr><th>Date</th><th>Zone</th><th>Type</th><th>Douleur</th></tr></thead>
-                <tbody></tbody>
-              </table>
-            </div>
-
-            <div class="mt-3 flex gap-2">
-              <button id="exportJson" class="bg-green-600 text-white px-3 py-2 rounded">Exporter JSON</button>
-              <input id="importFile" type="file" accept="application/json" class="hidden" />
-              <button id="importBtn" class="bg-yellow-400 px-3 py-2 rounded">Importer JSON</button>
-              <button id="clearHistory" class="bg-red-500 text-white px-3 py-2 rounded">Vider historique</button>
-            </div>
+            <button id="resetBtn" class="bg-gray-200 px-3 py-2 rounded">Réinitialiser blessures</button>
           </div>
         </section>
 
+        <!-- Right: injuries grouped by part + treatments -->
         <aside class="md:col-span-1 bg-white p-4 rounded-lg shadow">
-          <h2 class="font-medium mb-2">Guide rapide</h2>
-          <ul class="text-sm space-y-2 text-gray-600">
-            <li>1. Clique sur une zone du corps (plusieurs possibles).</li>
-            <li>2. Choisis le type de lésion et règle la douleur.</li>
-            <li>3. Appuie sur <strong>Ajouter blessure</strong>.</li>
-            <li>4. Quand terminé, clique <strong>Diagnostic final</strong>.</li>
-            <li>Les diagnostics sont stockés localement (JSON).</li>
-          </ul>
-          <hr class="my-3" />
-          <p class="text-xs text-gray-500">PiouPiouMatic est un outil RP — ne remplace pas un avis médical réel.</p>
+          <h2 class="font-medium mb-2">Blessures enregistrées</h2>
+          <div id="injuryList" class="text-sm text-gray-700 space-y-3">
+            <p class="text-gray-500">Aucune blessure pour le moment.</p>
+          </div>
         </aside>
       </main>
 
-      <footer class="mt-6 text-center text-xs text-gray-500">PiouPiouMatic • Déposez ce fichier sur GitHub Pages</footer>
+      <footer class="mt-6 text-center text-xs text-gray-500">PiouPiouMatic — Outil RP (remplacez l'image PNG dans /assets/)</footer>
+    </div>
+
+    <!-- Modal (hidden) -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+      <div class="bg-white rounded-lg w-11/12 max-w-md p-4">
+        <h3 id="modalTitle" class="text-lg font-medium">Ajouter une blessure</h3>
+        <p id="modalPart" class="text-sm text-gray-500">Partie: --</p>
+
+        <div class="mt-3">
+          <label class="block text-sm font-medium">Type de blessure</label>
+          <select id="modalInjuryType" class="w-full border rounded p-2">
+            <option value="arme_feu">Blessure par arme à feu</option>
+            <option value="arme_blanche">Blessure par arme blanche</option>
+            <option value="contondante">Traumatisme contondant</option>
+            <option value="avp">Accident de la voie publique (AVP)</option>
+            <option value="chute">Chute</option>
+          </select>
+        </div>
+
+        <div class="mt-3">
+          <label class="block text-sm font-medium">Douleur (1–10)</label>
+          <input id="modalPain" type="range" min="1" max="10" value="5" class="w-full" />
+          <div class="text-xs text-gray-500 mt-1">Valeur: <span id="modalPainLabel">5</span>/10</div>
+        </div>
+
+        <div class="mt-4 flex gap-2 justify-end">
+          <button id="modalCancel" class="px-3 py-2 rounded border">Annuler</button>
+          <button id="modalAdd" class="px-3 py-2 rounded bg-indigo-600 text-white">Ajouter</button>
+        </div>
+      </div>
     </div>
 
     <script>
+      // Zones and labels
       const ZONES = ['head','neck','chest','abdomen','pelvis','left_arm','right_arm','left_leg','right_leg'];
       const ZONE_LABEL = {head:'Tête',neck:'Cou',chest:'Thorax',abdomen:'Abdomen',pelvis:'Bassin',left_arm:'Bras gauche',right_arm:'Bras droit',left_leg:'Jambe gauche',right_leg:'Jambe droite'};
-      let selectedZones = new Set();
-      let injuries = [];
 
-      function generateDiagnosis(zone,type,pain){
-        const base={arme_feu:9,arme_blanche:7,contondante:5,avp:6,chute:6}[type]||5;
-        const score=Math.round((base+(pain/10*4)));
-        let triage='Stable';
-        if(score>=10) triage='Critique'; else if(score>=8) triage='Sérieux'; else if(score>=6) triage='Modéré';
-        let f='';
-        if(type==='arme_feu')f='Plaie par projectile avec risque d’hémorragie interne.';
-        else if(type==='arme_blanche')f='Plaie pénétrante nécessitant exploration.';
-        else if(type==='contondante')f='Traumatisme contondant, hématome possible.';
-        else if(type==='avp')f='Polytraumatisme probable suite à impact.';
-        else if(type==='chute')f='Traumatisme par chute, suspicion fracture.';
-        let z='';
-        if(zone==='head')z='Surveillance neurologique requise.';
-        else if(zone==='chest')z='Vérifier ventilation, suspicion pneumothorax.';
-        else if(zone==='abdomen')z='Vérifier rigidité abdominale et hémorragie interne.';
-        else if(zone==='pelvis')z='Stabiliser bassin, risque hémorragie.';
-        else if(zone.endsWith('_arm')||zone.endsWith('_leg'))z='Contrôler mobilité et saignement externe.';
-        const t=`Zone: ${ZONE_LABEL[zone]}\nType: ${type.replace('_',' ')}\nDouleur: ${pain}/10\n\nConclusion: ${f} ${z}\n\nTriage: ${triage} (score ${score}/13)`;
-        return {text:t,triage,severityScore:score,zone,type,pain};
+      // Data: injuries stored in-memory; grouped by zone
+      const injuriesByZone = {}; ZONES.forEach(z=>injuriesByZone[z]=[]);
+
+      // Treatment suggestions (simplified)
+      const TREATMENT = {
+        arme_feu: 'Pansement compressif, contrôle de l’hémorragie; transport urgent.',
+        arme_blanche: 'Désinfection, compression locale; surveillance et exploration si pénétrante.',
+        contondante: 'Glace, immobilisation, analgésie simple; vérifier fractures.',
+        avp: 'Immobilisation, analgesie, recherche de polytraumatisme; transport.',
+        chute: 'Immobilisation, examen pour fracture/commotion; surveillance.'
+      };
+
+      // Hook hotspots
+      const overlay = document.getElementById('overlay');
+      ZONES.forEach(id=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.addEventListener('click', (ev)=>{
+          ev.stopPropagation();
+          openModalForZone(id);
+        });
+        // hover effect: briefly highlight part (we draw a translucent path on top)
+        el.addEventListener('mouseenter', ()=>{el.setAttribute('fill','rgba(99,102,241,0.12)');});
+        el.addEventListener('mouseleave', ()=>{el.setAttribute('fill','transparent');});
+      });
+
+      // Modal controls
+      const modal = document.getElementById('modal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalPart = document.getElementById('modalPart');
+      const modalInjuryType = document.getElementById('modalInjuryType');
+      const modalPain = document.getElementById('modalPain');
+      const modalPainLabel = document.getElementById('modalPainLabel');
+      let currentZone = null;
+
+      modalPain.addEventListener('input', ()=>{ modalPainLabel.textContent = modalPain.value; });
+
+      function openModalForZone(zone){
+        currentZone = zone;
+        modalTitle.textContent = 'Ajouter une blessure — ' + (ZONE_LABEL[zone]||zone);
+        modalPart.textContent = 'Partie: ' + (ZONE_LABEL[zone]||zone);
+        modalInjuryType.value = 'arme_feu';
+        modalPain.value = 5; modalPainLabel.textContent = 5;
+        modal.classList.remove('hidden'); modal.classList.add('flex');
       }
 
-      const svgZones = ZONES.map(id=>document.getElementById(id));
-      svgZones.forEach(e=>{
-        e.addEventListener('click',()=>{
-          if(selectedZones.has(e.id)){
-            selectedZones.delete(e.id);
-            e.classList.remove('selected');
-          } else {
-            selectedZones.add(e.id);
-            e.classList.add('selected');
-          }
-          showSelection();
-        });
+      document.getElementById('modalCancel').addEventListener('click', ()=>{ closeModal(); });
+      function closeModal(){ modal.classList.remove('flex'); modal.classList.add('hidden'); currentZone = null; }
+
+      document.getElementById('modalAdd').addEventListener('click', ()=>{
+        if(!currentZone) return closeModal();
+        const type = modalInjuryType.value;
+        const pain = parseInt(modalPain.value,10);
+        const timestamp = new Date().toISOString();
+        const entry = {id: Date.now(), zone: currentZone, zoneLabel: ZONE_LABEL[currentZone], type, pain, treatment: TREATMENT[type], addedAt: timestamp};
+        injuriesByZone[currentZone].push(entry);
+        document.getElementById('lastAction').textContent = `Blessure ajoutée: ${entry.zoneLabel} — ${type.replace('_',' ')} (${entry.pain}/10)`;
+        closeModal(); renderInjuries();
       });
 
-      function showSelection(){
-        const box=document.getElementById('diagnosisBox');
-        if(selectedZones.size===0){
-          box.innerHTML='<p class="text-sm text-gray-500">Aucune zone sélectionnée.</p>';
-        } else {
-          box.innerHTML=`Zones sélectionnées : ${[...selectedZones].map(z=>ZONE_LABEL[z]).join(', ')}`;
-        }
+      // Reset button
+      document.getElementById('resetBtn').addEventListener('click', ()=>{
+        if(!confirm('Supprimer toutes les blessures ?')) return;
+        ZONES.forEach(z=>injuriesByZone[z]=[]); renderInjuries();
+        document.getElementById('lastAction').textContent = 'Blessures réinitialisées.';
+      });
+
+      // Render right column grouped by zone
+      function renderInjuries(){
+        const container = document.getElementById('injuryList');
+        container.innerHTML = '';
+        const partsWith = ZONES.filter(z=>injuriesByZone[z].length>0);
+        if(partsWith.length===0){ container.innerHTML = '<p class="text-gray-500">Aucune blessure pour le moment.</p>'; return; }
+        partsWith.forEach(zone=>{
+          const card = document.createElement('div');
+          card.className = 'border p-2 rounded';
+          const title = document.createElement('div'); title.className='font-medium'; title.textContent = `${ZONE_LABEL[zone]} — ${injuriesByZone[zone].length} blessure(s)`;
+          card.appendChild(title);
+
+          // list injuries
+          injuriesByZone[zone].forEach((inj, idx)=>{
+            const row = document.createElement('div'); row.className='mt-2 text-sm';
+            row.innerHTML = `<div class="flex justify-between items-start"><div><strong>${idx+1}.</strong> ${inj.type.replace('_',' ')} — douleur ${inj.pain}/10</div><div><button data-zone="${zone}" data-id="${inj.id}" class="text-xs px-2 py-1 border rounded remove-btn">Suppr</button></div></div><div class="text-xs mt-1 text-gray-600">Traitement: ${inj.treatment}</div>`;
+            card.appendChild(row);
+          });
+
+          container.appendChild(card);
+        });
+
+        // attach remove handlers
+        document.querySelectorAll('.remove-btn').forEach(btn=>{
+          btn.addEventListener('click', (ev)=>{
+            const zone = btn.getAttribute('data-zone');
+            const id = parseInt(btn.getAttribute('data-id'),10);
+            injuriesByZone[zone] = injuriesByZone[zone].filter(i=>i.id!==id);
+            renderInjuries();
+            document.getElementById('lastAction').textContent = 'Blessure supprimée.';
+          });
+        });
       }
 
-      const painScale=document.getElementById('painScale');
-      const painLabel=document.getElementById('painLabel');
-      painScale.addEventListener('input',()=>painLabel.textContent=painScale.value);
+      // Click outside modal closes it
+      modal.addEventListener('click', (ev)=>{ if(ev.target===modal) closeModal(); });
 
-      document.getElementById('generateBtn').addEventListener('click',()=>{
-        if(selectedZones.size===0){alert('Sélectionne au moins une zone.');return;}
-        const type=document.getElementById('injuryType').value;
-        const pain=parseInt(painScale.value,10);
-        selectedZones.forEach(zone=>{
-          const d=generateDiagnosis(zone,type,pain);
-          injuries.push(d);
-          saveHist(d);
-        });
-        selectedZones.clear();
-        svgZones.forEach(z=>z.classList.remove('selected'));
-        showSelection();
-        refresh();
-        displayAll();
-      });
+      // Init
+      renderInjuries();
 
-      document.getElementById('finalDiagnosisBtn').addEventListener('click',()=>{
-        if(injuries.length===0){alert('Aucune blessure enregistrée.');return;}
-        const totalPain=Math.round(injuries.reduce((s,i)=>s+i.pain,0)/injuries.length);
-        const maxSeverity=Math.max(...injuries.map(i=>i.severityScore));
-        let triage='Stable';
-        if(maxSeverity>=10)triage='Critique'; else if(maxSeverity>=8)triage='Sérieux'; else if(maxSeverity>=6)triage='Modéré';
-        const combined=`Diagnostic final — ${injuries.length} blessures enregistrées\n\n${injuries.map(i=>i.text).join('\n\n---\n\n')}\n\nDouleur moyenne: ${totalPain}/10\nTriage global: ${triage}`;
-        document.getElementById('diagnosisBox').innerHTML=`<pre class='whitespace-pre-wrap text-sm'>${combined}</pre>`;
-      });
-
-      document.getElementById('clearSelection').addEventListener('click',()=>{
-        selectedZones.clear();
-        svgZones.forEach(z=>z.classList.remove('selected'));
-        showSelection();
-      });
-
-      const KEY='pioupiou_history';
-      function load(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch{return[]}}
-      function save(h){localStorage.setItem(KEY,JSON.stringify(h));}
-      function saveHist(d){const h=load();h.unshift({...d,date:new Date().toISOString(),zoneLabel:ZONE_LABEL[d.zone]});save(h.slice(0,300));}
-      function refresh(){const tb=document.querySelector('#historyTable tbody');tb.innerHTML='';load().forEach(x=>{const tr=document.createElement('tr');tr.className='border-t';tr.innerHTML=`<td class='py-1 text-xs'>${new Date(x.date).toLocaleString()}</td><td class='py-1 text-xs'>${x.zoneLabel}</td><td class='py-1 text-xs'>${x.type}</td><td class='py-1 text-xs'>${x.pain}/10</td>`;tb.appendChild(tr);});}
-      function displayAll(){const box=document.getElementById('diagnosisBox');if(injuries.length===0)box.innerHTML='<p class="text-sm text-gray-500">Aucune blessure enregistrée.</p>';else box.innerHTML=`<pre class='whitespace-pre-wrap text-sm'>${injuries.map(i=>i.text).join('\n\n---\n\n')}</pre>`;}
-
-      document.getElementById('clearHistory').onclick=()=>{if(confirm('Vider historique ?')){save([]);refresh();}};
-      document.getElementById('exportJson').onclick=()=>{const h=load();const blob=new Blob([JSON.stringify(h,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='pioupiou_history.json';a.click();URL.revokeObjectURL(url);};
-      document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
-      document.getElementById('importFile').addEventListener('change',async ev=>{const f=ev.target.files[0];if(!f)return;try{const txt=await f.text();const j=JSON.parse(txt);if(Array.isArray(j)){save(j.concat(load()).slice(0,300));refresh();alert('Import réussi.');}}catch(e){alert('Erreur import');}});
-
-      showSelection();
-      refresh();
+      // Accessibility: allow keyboard escape to close modal
+      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape'){ if(!modal.classList.contains('hidden')) closeModal(); } });
     </script>
   </body>
 </html>
