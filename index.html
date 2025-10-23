@@ -8,75 +8,93 @@
 </head>
 <body>
 <div class="app">
-<header class="app-header">
-<h1>PiouPiouMatic v3 — Face & Dos</h1>
-<div class="muted">Fond noir • Texte blanc • Une modal • Zones précises</div>
-</header>
+  <header class="app-header">
+    <h1>PiouPiouMatic v3 — Face & Dos</h1>
+    <div class="muted">Fond noir • Texte blanc • Une modal • Zones précises</div>
+  </header>
 
+  <main class="layout">
+    <section id="imageContainer" class="panel image-panel">
+      <img id="bodyImg" src="assets/body_both.png" alt="Corps face et dos" class="body-image" />
+      <div id="hotspotLayer" class="hotspot-layer" aria-hidden="true"></div>
+      <div class="hint">Face = gauche • Dos = droite • Survolez pour voir la zone</div>
+    </section>
 
-<main class="layout">
-<section id="imageContainer" class="panel image-panel">
-<img id="bodyImg" src="assets/body_both.png" alt="Corps face et dos" class="body-image" />
-<div id="hotspotLayer" class="hotspot-layer" aria-hidden="true"></div>
-<div class="hint">Face = gauche • Dos = droite • Survolez pour voir la zone</div>
-</section>
+    <aside class="panel info-panel">
+      <h2>Blessures, symptômes & traitements</h2>
+      <div id="injuryList" class="injury-list">
+        <p class="muted">Aucune blessure pour le moment. Clique sur une zone.</p>
+      </div>
+      <div class="bottom-row">
+        <div class="muted">Douleur &gt; 5 → atteinte organes/muscles possible</div>
+        <button id="resetBtn" class="btn btn-danger">Réinitialiser</button>
+      </div>
+    </aside>
+  </main>
 
+  <!-- Modal -->
+  <div id="modal" class="modal hidden" role="dialog" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box" role="document">
+      <h3 id="modalTitle">Ajouter une blessure</h3>
+      <div id="modalPart" class="muted">Partie: --</div>
 
-<aside class="panel info-panel">
-<h2>Blessures, symptômes & traitements</h2>
-<div id="injuryList" class="injury-list">
-<p class="muted">Aucune blessure pour le moment. Clique sur une zone.</p>
-</div>
-<div class="bottom-row">
-<div class="muted">Douleur &gt; 5 → atteinte organes/muscles possible</div>
-<button id="resetBtn" class="btn btn-danger">Réinitialiser</button>
-</div>
-</aside>
-</main>
+      <label class="muted">Vue</label>
+      <select id="modalView" class="input">
+        <option value="face">Face</option>
+        <option value="dos">Dos</option>
+      </select>
 
+      <label class="muted">Type de blessure</label>
+      <select id="modalType" class="input"></select>
 
-<!-- Modal -->
-<div id="modal" class="modal hidden" role="dialog" aria-hidden="true">
-<div class="modal-backdrop"></div>
-<div class="modal-box" role="document">
-<h3 id="modalTitle">Ajouter une blessure</h3>
-<div id="modalPart" class="muted">Partie: --</div>
+      <label class="muted">Douleur (1–10)</label>
+      <input id="modalPain" type="range" min="1" max="10" value="5" class="range" />
+      <div class="muted">Valeur: <span id="modalPainLabel">5</span>/10</div>
 
+      <label class="muted">Symptômes suggérés</label>
+      <div id="modalSymptoms" class="muted">—</div>
 
-<label class="muted">Vue</label>
-<select id="modalView" class="input">
-<option value="face">Face</option>
-<option value="dos">Dos</option>
-</select>
+      <label class="muted">Traitements recommandés</label>
+      <div id="modalTreatments" class="muted">—</div>
 
+      <div class="modal-actions">
+        <button id="modalCancel" class="btn">Annuler</button>
+        <button id="modalAdd" class="btn btn-primary">Ajouter</button>
+      </div>
+    </div>
+  </div>
 
-<label class="muted">Type de blessure</label>
-<select id="modalType" class="input"></select>
-
-
-<label class="muted">Douleur (1–10)</label>
-<input id="modalPain" type="range" min="1" max="10" value="5" class="range" />
-<div class="muted">Valeur: <span id="modalPainLabel">5</span>/10</div>
-
-
-<label class="muted">Symptômes suggérés</label>
-<div id="modalSymptoms" class="muted">—</div>
-
-
-<label class="muted">Traitements recommandés</label>
-<div id="modalTreatments" class="muted">—</div>
-
-
-<div class="modal-actions">
-<button id="modalCancel" class="btn">Annuler</button>
-<button id="modalAdd" class="btn btn-primary">Ajouter</button>
-</div>
-</div>
+  <footer class="app-footer muted">PiouPiouMatic v3 — pour RP, non-médical</footer>
 </div>
 
+<script src="script.js"></script>
+<script>
+  // Assurer que le modal est caché au chargement
+  const modal = document.getElementById("modal");
+  document.addEventListener("DOMContentLoaded", () => {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  });
 
-<footer class="app-footer muted">PiouPiouMatic v3 — pour RP, non-médical</footer>
-</div>
+  // Exemple d'ouverture du modal uniquement au clic sur une zone
+  const hotspots = document.querySelectorAll(".hotspot");
+  hotspots.forEach((spot) => {
+    spot.addEventListener("click", () => {
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
 
+      // Affiche la zone sélectionnée dans le modal
+      const partName = spot.title || spot.dataset.zone;
+      document.getElementById("modalPart").textContent = "Partie: " + partName;
+    });
+  });
 
+  // Fermeture du modal
+  document.getElementById("modalCancel").addEventListener("click", () => {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  });
+</script>
+</body>
 </html>
