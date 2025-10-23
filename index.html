@@ -1,454 +1,78 @@
 <!doctype html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PiouPiouMatic — Face & Dos</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    html,body { height:100%; background:#000; color:#fff; }
-    .body-image { max-width:1000px; width:100%; height:auto; display:block; margin:0 auto; }
-    .hotspot { position:absolute; cursor:pointer; /* transparent but visible on hover */ }
-    .hotspot:hover { outline:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.02); }
-    .panel { background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04); }
-    .small-muted { color: #bbb; font-size:0.9rem; }
-    /* Make layout responsive */
-    @media (min-width:1024px) {
-      .layout { display:grid; grid-template-columns: 1fr 420px; gap:20px; align-items:start; max-width:1200px; margin:0 auto; padding:20px; }
-    }
-    @media (max-width:1023px) {
-      .layout { padding:12px; display:block; }
-    }
-  </style>
 </head>
 <body>
-  <div class="max-w-6xl mx-auto p-4">
-    <header class="flex items-center justify-between mb-4">
-      <h1 class="text-2xl font-semibold">PiouPiouMatic — Face & Dos</h1>
-      <div class="small-muted">Fond noir • Texte blanc • Pas d'historique</div>
-    </header>
+<div class="app">
+<header class="app-header">
+<h1>PiouPiouMatic v3 — Face & Dos</h1>
+<div class="muted">Fond noir • Texte blanc • Une modal • Zones précises</div>
+</header>
 
-    <div class="layout">
-      <!-- Left: image container with overlay -->
-      <div id="imageContainer" class="relative panel rounded-lg overflow-hidden" style="padding:12px;">
-        <!-- Image with face (left) and back (right) side-by-side in same PNG -->
-        <!-- Put your combined image here: recommended ~1000x600, with face at left half and back at right half -->
-        <img id="bodyImg" src="assets/body_both.png" alt="Corps face et dos" class="body-image" />
 
-        <!-- Clickable hotspots will be injected dynamically and positioned relative to the image bounding box -->
-        <div id="hotspotLayer" class="absolute" style="left:0;top:0;width:100%;height:100%;pointer-events:none;"></div>
-        <div class="small-muted text-center mt-2">Clique sur une zone (face = gauche, dos = droite)</div>
-      </div>
+<main class="layout">
+<section id="imageContainer" class="panel image-panel">
+<img id="bodyImg" src="assets/body_both.png" alt="Corps face et dos" class="body-image" />
+<div id="hotspotLayer" class="hotspot-layer" aria-hidden="true"></div>
+<div class="hint">Face = gauche • Dos = droite • Survolez pour voir la zone</div>
+</section>
 
-      <!-- Right: diagnostic / injuries -->
-      <aside class="panel rounded-lg p-4">
-        <h2 class="text-xl font-medium mb-2">Blessures & Traitements</h2>
-        <div id="injuryList" class="space-y-3 text-sm text-gray-200">
-          <p class="text-gray-400">Aucune blessure pour le moment. Clique sur une zone.</p>
-        </div>
 
-        <div class="mt-4 flex justify-between items-center">
-          <div class="small-muted">Douleur >5 → atteinte organes/muscles possible</div>
-          <div>
-            <button id="resetBtn" class="px-3 py-2 bg-red-600 rounded text-white hover:bg-red-700">Réinitialiser</button>
-          </div>
-        </div>
-      </aside>
-    </div>
-  </div>
+<aside class="panel info-panel">
+<h2>Blessures, symptômes & traitements</h2>
+<div id="injuryList" class="injury-list">
+<p class="muted">Aucune blessure pour le moment. Clique sur une zone.</p>
+</div>
+<div class="bottom-row">
+<div class="muted">Douleur &gt; 5 → atteinte organes/muscles possible</div>
+<button id="resetBtn" class="btn btn-danger">Réinitialiser</button>
+</div>
+</aside>
+</main>
 
-  <!-- Modal: add injury -->
-  <div id="modal" class="fixed inset-0 hidden items-center justify-center z-50">
-    <div class="absolute inset-0 bg-black/70"></div>
-    <div class="relative bg-gray-900 rounded-lg p-4 w-11/12 max-w-md">
-      <h3 id="modalTitle" class="text-lg font-semibold mb-1">Ajouter une blessure</h3>
-      <div id="modalPart" class="small-muted mb-3">Partie: --</div>
 
-      <div class="mb-3">
-        <label class="small-muted block mb-1">Vue</label>
-        <select id="modalView" class="w-full bg-black text-white p-2 rounded">
-          <option value="face">Face</option>
-          <option value="dos">Dos</option>
-        </select>
-      </div>
+<!-- Modal -->
+<div id="modal" class="modal hidden" role="dialog" aria-hidden="true">
+<div class="modal-backdrop"></div>
+<div class="modal-box" role="document">
+<h3 id="modalTitle">Ajouter une blessure</h3>
+<div id="modalPart" class="muted">Partie: --</div>
 
-      <div class="mb-3">
-        <label class="small-muted block mb-1">Type de blessure (peut s'ajuster selon douleur)</label>
-        <select id="modalType" class="w-full bg-black text-white p-2 rounded"></select>
-      </div>
 
-      <div class="mb-3">
-        <label class="small-muted block mb-1">Douleur (1 - 10)</label>
-        <input id="modalPain" type="range" min="1" max="10" value="5" class="w-full" />
-        <div class="small-muted mt-1">Valeur: <span id="modalPainLabel">5</span>/10</div>
-      </div>
+<label class="muted">Vue</label>
+<select id="modalView" class="input">
+<option value="face">Face</option>
+<option value="dos">Dos</option>
+</select>
 
-      <div class="mb-2">
-        <label class="small-muted block mb-1">Atteinte (automatique si douleur > 5)</label>
-        <div id="modalExtra" class="small-muted">—</div>
-      </div>
 
-      <div class="flex justify-end gap-2 mt-4">
-        <button id="modalCancel" class="px-3 py-2 bg-gray-700 rounded">Annuler</button>
-        <button id="modalAdd" class="px-3 py-2 bg-indigo-600 rounded text-white">Ajouter</button>
-      </div>
-    </div>
-  </div>
+<label class="muted">Type de blessure</label>
+<select id="modalType" class="input"></select>
 
-<script>
-/* PiouPiouMatic — final adaptation
-   - Uses a single PNG containing face (left) and back (right)
-   - Hotspots created and positioned relative to image
-   - Injuries grouped by zone+view, pain-based evolution, treatments suggested
-   - Crotch click counter => shows neutral RP message after 10 clicks
-*/
 
-/* CONFIG: define logical hotspot rectangles as percentages of the full image.
-   Coordinates are normalized: left%, top%, width%, height% relative to the image.
-   We assume the combined PNG places face on left half (0-50% width) and back on right half (50-100% width).
-   Zones include side indicator in id: e.g. 'head_face', 'head_dos', etc.
-*/
-const HOTSPOTS = [
-  // Face side (left half) — prefix "_face"
-  { id: 'head_face', label:'Tête (face)', left:12, top:6, w:12, h:16, view:'face', zone:'head' },
-  { id: 'neck_face', label:'Cou (face)', left:22, top:20, w:8, h:8, view:'face', zone:'neck' },
-  { id: 'chest_face', label:'Thorax (face)', left:18, top:28, w:16, h:18, view:'face', zone:'chest' },
-  { id: 'abdomen_face', label:'Abdomen (face)', left:20, top:48, w:14, h:14, view:'face', zone:'abdomen' },
-  { id: 'pelvis_face', label:'Bassin (face)', left:22, top:62, w:10, h:10, view:'face', zone:'pelvis' },
-  { id: 'left_arm_face', label:'Bras gauche (face)', left:6, top:30, w:10, h:28, view:'face', zone:'left_arm' },
-  { id: 'right_arm_face', label:'Bras droit (face)', left:36, top:30, w:10, h:28, view:'face', zone:'right_arm' },
-  { id: 'left_leg_face', label:'Jambe gauche (face)', left:22, top:76, w:7, h:18, view:'face', zone:'left_leg' },
-  { id: 'right_leg_face', label:'Jambe droite (face)', left:31, top:76, w:7, h:18, view:'face', zone:'right_leg' },
-  { id: 'crotch_face', label:'Entrejambe (face)', left:26, top:68, w:8, h:8, view:'face', zone:'crotch' },
+<label class="muted">Douleur (1–10)</label>
+<input id="modalPain" type="range" min="1" max="10" value="5" class="range" />
+<div class="muted">Valeur: <span id="modalPainLabel">5</span>/10</div>
 
-  // Back side (right half) — positions approximately mirrored on right half
-  { id: 'head_dos', label:'Tête (dos)', left:62, top:6, w:12, h:16, view:'dos', zone:'head' },
-  { id: 'neck_dos', label:'Cou (dos)', left:72, top:20, w:8, h:8, view:'dos', zone:'neck' },
-  { id: 'chest_dos', label:'Thorax (dos)', left:68, top:28, w:16, h:18, view:'dos', zone:'chest' },
-  { id: 'abdomen_dos', label:'Abdomen (dos)', left:70, top:48, w:14, h:14, view:'dos', zone:'abdomen' },
-  { id: 'pelvis_dos', label:'Bassin (dos)', left:72, top:62, w:10, h:10, view:'dos', zone:'pelvis' },
-  { id: 'left_arm_dos', label:'Bras gauche (dos)', left:56, top:30, w:10, h:28, view:'dos', zone:'left_arm' },
-  { id: 'right_arm_dos', label:'Bras droit (dos)', left:86, top:30, w:10, h:28, view:'dos', zone:'right_arm' },
-  { id: 'left_leg_dos', label:'Jambe gauche (dos)', left:72, top:76, w:7, h:18, view:'dos', zone:'left_leg' },
-  { id: 'right_leg_dos', label:'Jambe droite (dos)', left:81, top:76, w:7, h:18, view:'dos', zone:'right_leg' },
-  { id: 'crotch_dos', label:'Entrejambe (dos)', left:76, top:68, w:8, h:8, view:'dos', zone:'crotch' },
-];
 
-/* Injury logic:
-   - For pain <=5: superficial injuries (plaie superf., contusion, fracture simple, éraflure)
-   - For pain >5: deeper injuries with organ/muscle involvement; organ depends on zone
-   - Treatments depend on injury type and organ/muscle
-*/
-const SUPERFICIAL = [
-  { key:'plaie_superf', label:'Plaie superficielle', treatment:'Nettoyage, suture si nécessaire, pansement' },
-  { key:'contusion', label:'Contusion', treatment:'Glace, repos, analgésie' },
-  { key:'fracture_simple', label:'Fracture simple suspectée', treatment:'Radio + immobilisation' },
-  { key:'eraflure', label:'Éraflure', treatment:'Désinfection + pansement' },
-];
+<label class="muted">Symptômes suggérés</label>
+<div id="modalSymptoms" class="muted">—</div>
 
-const DEEP_BY_ZONE = {
-  head: [
-    { key:'trauma_cranien', label:'Traumatisme crânien', treatment:'Scanner cérébral; surveillance neuro' },
-    { key:'hemorragie', label:'Hémorragie intracrânienne possible', treatment:'Scanner urgent; neurochirurgie' }
-  ],
-  chest: [
-    { key:'poumon', label:'Atteinte pulmonaire (contusion/pneumothorax)', treatment:'Scanner thoracique; oxygène; drainage si nécessaire' },
-    { key:'coeur', label:'Atteinte cardiaque possible', treatment:'ECG/échographie; prise en charge hospitalière' }
-  ],
-  abdomen: [
-    { key:'foie_rate', label:'Atteinte hépatique/splénique', treatment:'Scanner abdo; surveillance hémodynamique; chirurgie si nécessaire' },
-    { key:'intestin', label:'Lésion viscérale possible', treatment:'Scanner abdo; exploration chirurgicale selon état' }
-  ],
-  pelvis: [
-    { key:'pelvis', label:'Fracture du bassin / lésion pelvienne', treatment:'Immobilisation; scanner; stabilisation hémorragique' },
-    { key:'organes_pelviens', label:'Atteinte organes pelviens', treatment:'Evaluation gynéco/urologique; imagerie' }
-  ],
-  left_arm: [
-    { key:'muscle_arm', label:'Atteinte musculaire / déchirure', treatment:'IRM musculo-squelettique; immobilisation' },
-    { key:'os_arm', label:'Fracture possible', treatment:'Radio; immobilisation' }
-  ],
-  right_arm: [
-    { key:'muscle_arm', label:'Atteinte musculaire / déchirure', treatment:'IRM musculo-squelettique; immobilisation' },
-    { key:'os_arm', label:'Fracture possible', treatment:'Radio; immobilisation' }
-  ],
-  left_leg: [
-    { key:'muscle_leg', label:'Atteinte musculaire / déchirure', treatment:'IRM musculo-squelettique; immobilisation' },
-    { key:'os_leg', label:'Fracture possible', treatment:'Radio; immobilisation' }
-  ],
-  right_leg: [
-    { key:'muscle_leg', label:'Atteinte musculaire / déchirure', treatment:'IRM musculo-squelettique; immobilisation' },
-    { key:'os_leg', label:'Fracture possible', treatment:'Radio; immobilisation' }
-  ],
-  neck: [
-    { key:'voies_aeriennes', label:'Atteinte voies aériennes / vasculaires', treatment:'Immobilisation; contrôle voies aériennes; imagerie' },
-    { key:'rachis_cervical', label:'Atteinte rachis cervical', treatment:'IRM rachis; immobilisation' }
-  ],
-  crotch: [
-    { key:'pelvic_soft', label:'Atteinte pelvienne / organes sensibles', treatment:'Evaluation urologique/gynéco; imagerie' }
-  ]
-};
 
-/* Extra treatments for ballistic/pénétrant */
-const PENETRATING_TREATMENT = 'Extraction de balle / chirurgie si projectile présent; imagerie pré-opératoire (Scanner)';
+<label class="muted">Traitements recommandés</label>
+<div id="modalTreatments" class="muted">—</div>
 
-/* Data storage (in-memory): injuries grouped by view+zone */
-const injuriesByPlace = {}; // key: "<view>__<zone>" => array
-HOTSPOTS.forEach(h => { injuriesByPlace[`${h.view}__${h.zone}`] = []; });
 
-/* click counter for crotch area (both front and back combined) */
-let crotchClicks = 0;
-const CROTCH_TRIGGER = 10;
-const CROTCH_MESSAGE = "Doucement docteur, c'est une zone sensible 😅"; // neutral RP message
+<div class="modal-actions">
+<button id="modalCancel" class="btn">Annuler</button>
+<button id="modalAdd" class="btn btn-primary">Ajouter</button>
+</div>
+</div>
+</div>
 
-/* Helper DOM elements */
-const hotspotLayer = document.getElementById('hotspotLayer');
-const bodyImg = document.getElementById('bodyImg');
-const injuryList = document.getElementById('injuryList');
-const modal = document.getElementById('modal');
-const modalTitle = document.getElementById('modalTitle');
-const modalPart = document.getElementById('modalPart');
-const modalType = document.getElementById('modalType');
-const modalPain = document.getElementById('modalPain');
-const modalPainLabel = document.getElementById('modalPainLabel');
-const modalExtra = document.getElementById('modalExtra');
-const modalView = document.getElementById('modalView');
 
-let currentHotspot = null;
+<footer class="app-footer muted">PiouPiouMatic v3 — pour RP, non-médical</footer>
+</div>
 
-/* Create hotspot elements positioned over the image.
-   Because the image may be resized responsively, we calculate absolute positions
-   whenever the image loads or resizes.
-*/
-function buildHotspots() {
-  hotspotLayer.innerHTML = '';
-  HOTSPOTS.forEach(h => {
-    const el = document.createElement('div');
-    el.id = h.id;
-    el.className = 'hotspot';
-    el.style.pointerEvents = 'auto';
-    el.setAttribute('data-label', h.label);
-    // store percentages on element for layout refresh
-    el.dataset.left = h.left; el.dataset.top = h.top; el.dataset.w = h.w; el.dataset.h = h.h;
-    el.addEventListener('click', hotspotClick);
-    hotspotLayer.appendChild(el);
-  });
-  positionHotspots();
-}
 
-/* Position hotspots to match current image size and offset.
-   The hotspotLayer is absolute relative to imageContainer; compute based on image natural size.
-*/
-function positionHotspots() {
-  const imgRect = bodyImg.getBoundingClientRect();
-  const layerRect = hotspotLayer.getBoundingClientRect();
-  // Because hotspotLayer covers entire image container (it was set to inset:0), we can position by percentage relative to layer size.
-  Array.from(hotspotLayer.children).forEach(el => {
-    const left = parseFloat(el.dataset.left), top = parseFloat(el.dataset.top),
-          w = parseFloat(el.dataset.w), h = parseFloat(el.dataset.h);
-    el.style.left = (left/100 * layerRect.width) + 'px';
-    el.style.top = (top/100 * layerRect.height) + 'px';
-    el.style.width = (w/100 * layerRect.width) + 'px';
-    el.style.height = (h/100 * layerRect.height) + 'px';
-    el.style.borderRadius = '8px';
-  });
-}
-
-/* When a hotspot is clicked: open modal, prefill with suggested types based on pain threshold
-*/
-function hotspotClick(ev) {
-  ev.stopPropagation();
-  const el = ev.currentTarget;
-  const id = el.id;
-  currentHotspot = HOTSPOTS.find(h => h.id === id);
-  if (!currentHotspot) return;
-  // crotch click counter
-  if (currentHotspot.zone === 'crotch') {
-    crotchClicks++;
-    if (crotchClicks >= CROTCH_TRIGGER) {
-      alert(CROTCH_MESSAGE);
-      crotchClicks = 0;
-    }
-  }
-  // Prepare modal
-  modalTitle.textContent = `Ajouter blessure — ${currentHotspot.label}`;
-  modalPart.textContent = `Partie: ${currentHotspot.label}`;
-  modalView.value = currentHotspot.view;
-  modalPain.value = 5;
-  modalPainLabel.textContent = '5';
-  populateTypeOptions(5, currentHotspot.zone);
-  modalExtra.textContent = '—';
-  showModal();
-}
-
-/* populate the modalType select with choices that make sense for the zone + pain */
-function populateTypeOptions(pain, zone) {
-  modalType.innerHTML = '';
-  if (pain <= 5) {
-    SUPERFICIAL.forEach(s => {
-      const o = document.createElement('option');
-      o.value = s.key; o.textContent = s.label;
-      modalType.appendChild(o);
-    });
-  } else {
-    // pain > 5: deep types first then superficial fallback
-    const deep = DEEP_BY_ZONE[zone] || [];
-    deep.forEach(d => {
-      const o = document.createElement('option');
-      o.value = d.key; o.textContent = d.label;
-      modalType.appendChild(o);
-    });
-    // also include penetrating option and superficial options
-    const penetrate = document.createElement('option');
-    penetrate.value = 'penetrant'; penetrate.textContent = 'Lésion pénétrante / projectile';
-    modalType.appendChild(penetrate);
-    SUPERFICIAL.forEach(s => {
-      const o = document.createElement('option');
-      o.value = s.key; o.textContent = s.label;
-      modalType.appendChild(o);
-    });
-  }
-  // Update extra field (organ/muscle) according to pain
-  if (pain > 5) {
-    // give a short suggestion about what can be affected
-    const deep = DEEP_BY_ZONE[zone] || [];
-    if (deep.length > 0) modalExtra.textContent = `Possible atteinte: ${deep.map(d=>d.label).join(' / ')}`;
-    else modalExtra.textContent = 'Atteinte musculaire/organique possible';
-  } else {
-    modalExtra.textContent = 'Blessure probablement superficielle';
-  }
-}
-
-/* Utility: resolve treatment suggestion text for a selected type & zone & pain */
-function resolveTreatment(typeKey, zone, pain) {
-  // penetrating overrides
-  if (typeKey === 'penetrant') return PENETRATING_TREATMENT;
-  // superficial types
-  const sf = SUPERFICIAL.find(s => s.key === typeKey);
-  if (sf) return sf.treatment;
-  // deep types
-  const deep = (DEEP_BY_ZONE[zone] || []).find(d => d.key === typeKey);
-  if (deep) return deep.treatment;
-  // fallback: for deep pain >5, prefer scanner/IRM depending on zone
-  if (pain > 7) {
-    if (['head','chest','abdomen','pelvis'].includes(zone)) return 'Scanner urgent (trauma sévère) + prise en charge hospitalière';
-    if (['left_arm','right_arm','left_leg','right_leg','neck'].includes(zone)) return 'IRM musculo-squelettique';
-  }
-  if (pain > 5) return 'Imagerie (Scanner/IRM) selon contexte; prise en charge spécialisée';
-  return 'Soins locaux; surveillance';
-}
-
-/* Show / hide modal */
-function showModal() { modal.classList.remove('hidden'); modal.style.display = 'flex'; }
-function hideModal() { modal.classList.add('hidden'); modal.style.display = 'none'; }
-
-/* Modal control bindings */
-document.getElementById('modalCancel').addEventListener('click', () => { hideModal(); currentHotspot = null; });
-modalPain.addEventListener('input', () => {
-  modalPainLabel.textContent = modalPain.value;
-  if (currentHotspot) populateTypeOptions(parseInt(modalPain.value,10), currentHotspot.zone);
-});
-
-/* Add the injury to in-memory store and re-render list */
-document.getElementById('modalAdd').addEventListener('click', () => {
-  if (!currentHotspot) { hideModal(); return; }
-  const view = modalView.value;
-  const typeKey = modalType.value;
-  const pain = parseInt(modalPain.value,10);
-  const placeKey = `${view}__${currentHotspot.zone}`;
-  const label = (() => {
-    // find label text
-    const s = SUPERFICIAL.find(s=>s.key===typeKey); if (s) return s.label;
-    const d = (DEEP_BY_ZONE[currentHotspot.zone]||[]).find(x=>x.key===typeKey); if (d) return d.label;
-    if (typeKey === 'penetrant') return 'Lésion pénétrante / projectile';
-    return typeKey;
-  })();
-  const treatment = resolveTreatment(typeKey, currentHotspot.zone, pain);
-  const entry = {id: Date.now(), view, zone: currentHotspot.zone, label, typeKey, pain, treatment, addedAt: new Date().toISOString()};
-  injuriesByPlace[placeKey].push(entry);
-  hideModal();
-  currentHotspot = null;
-  renderInjuries();
-});
-
-/* Render injuries grouped by view and zone in the right panel */
-function renderInjuries() {
-  const container = injuryList;
-  container.innerHTML = '';
-  // collect groups with at least 1 injury
-  const groups = [];
-  Object.keys(injuriesByPlace).forEach(k=>{
-    const arr = injuriesByPlace[k];
-    if (arr.length > 0) groups.push({key:k, arr});
-  });
-  if (groups.length === 0) {
-    container.innerHTML = '<p class="text-gray-400">Aucune blessure pour le moment. Clique sur une zone.</p>';
-    return;
-  }
-  // order groups by face then dos
-  groups.sort((a,b)=>a.key.localeCompare(b.key));
-  groups.forEach(g => {
-    const [view, zone] = g.key.split('__');
-    const title = document.createElement('div');
-    title.className = 'font-medium text-white';
-    title.textContent = `${view === 'face' ? 'Face' : 'Dos'} — ${zone.charAt(0).toUpperCase()+zone.slice(1)}`;
-    const card = document.createElement('div');
-    card.className = 'p-2 rounded border border-white/5';
-    card.appendChild(title);
-    g.arr.forEach((entry, idx) => {
-      const row = document.createElement('div');
-      row.className = 'mt-2 text-sm';
-      row.innerHTML = `<div class="flex justify-between items-start"><div><strong>${idx+1}.</strong> ${entry.label} — douleur ${entry.pain}/10</div>
-                       <div><button class="remove-btn text-red-400 px-2 py-1 rounded" data-group="${g.key}" data-id="${entry.id}">Suppr</button></div></div>
-                       <div class="text-xs mt-1 text-gray-300">Traitement suggéré: ${entry.treatment}</div>`;
-      card.appendChild(row);
-    });
-    container.appendChild(card);
-  });
-
-  // attach remove handlers
-  container.querySelectorAll('.remove-btn').forEach(btn => {
-    btn.onclick = (e) => {
-      const group = e.currentTarget.dataset.group;
-      const id = parseInt(e.currentTarget.dataset.id,10);
-      injuriesByPlace[group] = injuriesByPlace[group].filter(i => i.id !== id);
-      renderInjuries();
-    };
-  });
-}
-
-/* Reset all injuries */
-document.getElementById('resetBtn').addEventListener('click', () => {
-  if (!confirm('Supprimer toutes les blessures ?')) return;
-  Object.keys(injuriesByPlace).forEach(k=> injuriesByPlace[k]=[]);
-  renderInjuries();
-});
-
-/* Initialize: build hotspots and handle resizing */
-buildHotspots();
-window.addEventListener('resize', positionHotspots);
-bodyImg.addEventListener('load', positionHotspots);
-setTimeout(positionHotspots, 200);
-
-/* UX: clicking outside modal closes it */
-document.addEventListener('click', (e) => {
-  if (!modal.classList.contains('hidden')) {
-    const modalBox = modal.querySelector('.relative');
-    if (!modalBox.contains(e.target)) { hideModal(); currentHotspot = null; }
-  }
-});
-
-/* Prevent pointer events on hotspotLayer until image is loaded and positioned */
-bodyImg.addEventListener('load', () => {
-  // positionHotspots already called; ensure pointer events enabled
-  hotspotLayer.style.pointerEvents = 'auto';
-});
-
-/* Accessibility: Escape closes modal */
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && !modal.classList.contains('hidden')) hideModal();
-});
-
-/* End of script */
-</script>
+<script src="script.js"></script>
 </body>
 </html>
