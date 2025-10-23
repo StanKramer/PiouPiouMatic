@@ -1,63 +1,182 @@
-/* PiouPiouMatic v3 — script.js
-Hotspots calibrated to assets/body_both.png with light overlap.
-Ensure image is present at assets/body_both.png
-*/
+// ===========================
+// PiouPiouMatic Diagnostic UI
+// ===========================
 
+// RÉFÉRENCES DOM
+const bodyMap = document.getElementById("body-map");
+const modal = document.getElementById("injury-modal");
+const typeSelect = document.getElementById("injury-type");
+const painInput = document.getElementById("pain-level");
+const saveBtn = document.getElementById("save-injury");
+const closeBtn = document.getElementById("close-modal");
+const injuryList = document.getElementById("injury-list");
 
-// HOTSPOTS: percentages relative to image container (left%, top%, width%, height%)
-const HOTSPOTS = [
-// Face (left half ~0-50)
-{id:'head_face',label:'Tête (face)',left:6,top:4,w:12,h:14,view:'face',zone:'head'},
-{id:'jaw_face',label:'Mâchoire',left:14,top:16,w:10,h:8,view:'face',zone:'jaw'},
-{id:'neck_face',label:'Cou',left:22,top:20,w:8,h:8,view:'face',zone:'neck'},
-{id:'chest_face',label:'Thorax',left:18,top:30,w:16,h:16,view:'face',zone:'chest'},
-{id:'abdomen_face',label:'Abdomen',left:20,top:50,w:14,h:14,view:'face',zone:'abdomen'},
-{id:'pelvis_face',label:'Bassin',left:22,top:68,w:12,h:10,view:'face',zone:'pelvis'},
-{id:'left_shoulder_face',label:'Épaule gauche',left:8,top:28,w:10,h:10,view:'face',zone:'left_shoulder'},
-{id:'right_shoulder_face',label:'Épaule droite',left:36,top:28,w:10,h:10,view:'face',zone:'right_shoulder'},
-{id:'left_forearm_face',label:'Avant-bras gauche',left:6,top:38,w:10,h:18,view:'face',zone:'left_forearm'},
-{id:'right_forearm_face',label:'Avant-bras droit',left:36,top:38,w:10,h:18,view:'face',zone:'right_forearm'},
-{id:'left_hand_face',label:'Main / doigts gauche',left:6,top:58,w:10,h:12,view:'face',zone:'left_hand'},
-{id:'right_hand_face',label:'Main / doigts droit',left:36,top:58,w:10,h:12,view:'face',zone:'right_hand'},
-{id:'left_thigh_face',label:'Cuisse gauche',left:20,top:72,w:10,h:18,view:'face',zone:'left_thigh'},
-{id:'right_thigh_face',label:'Cuisse droite',left:30,top:72,w:10,h:18,view:'face',zone:'right_thigh'},
-{id:'left_shin_face',label:'Tibia gauche',left:20,top:86,w:6,h:12,view:'face',zone:'left_shin'},
-{id:'right_shin_face',label:'Tibia droit',left:32,top:86,w:6,h:12,view:'face',zone:'right_shin'},
-{id:'crotch_face',label:'Entrejambe (face)',left:26,top:70,w:6,h:8,view:'face',zone:'crotch'},
-// Back (right half ~50-100)
-{id:'head_dos',label:'Tête (dos)',left:56,top:4,w:12,h:14,view:'dos',zone:'head'},
-{id:'neck_dos',label:'Cou (dos)',left:66,top:18,w:8,h:8,view:'dos',zone:'neck'},
-{id:'upper_back',label:'Haut du dos',left:62,top:30,w:16,h:12,view:'dos',zone:'upper_back'},
-{id:'lower_back',label:'Bas du dos',left:64,top:44,w:14,h:12,view:'dos',zone:'lower_back'},
-{id:'left_shoulder_dos',label:'Épaule gauche (dos)',left:56,top:28,w:10,h:10,view:'dos',zone:'left_shoulder'},
-{id:'right_shoulder_dos',label:'Épaule droite (dos)',left:86,top:28,w:10,h:10,view:'dos',zone:'right_shoulder'},
-{id:'left_arm_dos',label:'Avant-bras gauche (dos)',left:56,top:38,w:10,h:18,view:'dos',zone:'left_forearm'},
-{id:'right_arm_dos',label:'Avant-bras droit (dos)',left:86,top:38,w:10,h:18,view:'dos',zone:'right_forearm'},
-{id:'left_hand_dos',label:'Main gauche (dos)',left:56,top:58,w:10,h:12,view:'dos',zone:'left_hand'},
-{id:'right_hand_dos',label:'Main droite (dos)',left:86,top:58,w:10,h:12,view:'dos',zone:'right_hand'},
-{id:'left_thigh_dos',label:'Cuisse gauche (dos)',left:64,top:72,w:10,h:18,view:'dos',zone:'left_thigh'},
-{id:'right_thigh_dos',label:'Cuisse droite (dos)',left:80,top:72,w:10,h:18,view:'dos',zone:'right_thigh'},
-{id:'left_shin_dos',label:'Tibia gauche (dos)',left:66,top:86,w:6,h:12,view:'dos',zone:'left_shin'},
-{id:'right_shin_dos',label:'Tibia droit (dos)',left:78,top:86,w:6,h:12,view:'dos',zone:'right_shin'},
-{id:'crotch_dos',label:'Entrejambe (dos)',left:74,top:70,w:6,h:8,view:'dos',zone:'crotch'}
+let injuries = [];
+let currentZone = null;
+
+// Empêche le modal de s’afficher au démarrage
+document.addEventListener("DOMContentLoaded", () => {
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
+  currentZone = null;
+});
+
+// ===========================
+// DÉFINITION DES ZONES
+// ===========================
+const zones = [
+  { id: "head", name: "Tête / Mâchoire", x: "49%", y: "12%" },
+  { id: "chest", name: "Torse", x: "49%", y: "30%" },
+  { id: "abdomen", name: "Abdomen", x: "49%", y: "45%" },
+  { id: "left-arm", name: "Bras gauche / Avant-bras", x: "38%", y: "30%" },
+  { id: "right-arm", name: "Bras droit / Avant-bras", x: "60%", y: "30%" },
+  { id: "left-hand", name: "Main gauche / Doigts", x: "34%", y: "45%" },
+  { id: "right-hand", name: "Main droite / Doigts", x: "64%", y: "45%" },
+  { id: "left-thigh", name: "Cuisse gauche", x: "45%", y: "60%" },
+  { id: "right-thigh", name: "Cuisse droite", x: "53%", y: "60%" },
+  { id: "left-leg", name: "Jambe gauche / Tibia", x: "46%", y: "75%" },
+  { id: "right-leg", name: "Jambe droite / Tibia", x: "52%", y: "75%" },
+  { id: "groin", name: "Entre-jambe", x: "49%", y: "54%" },
 ];
 
+// Ajout dynamique des hotspots
+zones.forEach((zone) => {
+  const spot = document.createElement("div");
+  spot.classList.add("hotspot");
+  spot.style.left = zone.x;
+  spot.style.top = zone.y;
+  spot.dataset.zone = zone.id;
+  spot.title = zone.name;
 
-// Injury libraries (condensed for readability)
-const SUPERFICIAL = [
-{key:'plaie_superf',label:'Plaie superficielle',symptoms:['Saignement local','Douleur légère'],treatments:['Nettoyage, pansement','Antiseptique local','Crème apaisante','Paracétamol']},
-{key:'contusion',label:'Contusion',symptoms:['Ecchymose','Gonflement','Douleur'],treatments:['Glace, repos','Paracétamol/IBU si toléré','Crème anti-inflammatoire']},
-{key:'fracture_simple',label:'Fracture suspectée',symptoms:['Douleur à mobilisation','Déformation possible'],treatments:['Radio','Immobilisation','Antalgiques']},
-{key:'eraflure',label:'Éraflure',symptoms:['Perte superficielle de peau','Douleur légère'],treatments:['Désinfection','Pansement','Crème cicatrisante']}
-];
+  // Clic sur zone → ouvre le modal
+  spot.addEventListener("click", () => {
+    openModal(zone);
+    handleSpecialClick(zone);
+  });
 
+  bodyMap.appendChild(spot);
+});
 
-const DEEP_BY_ZONE = {
-head:[{key:'trauma_cranien',label:'Traumatisme crânien',symptoms:['Céphalées','Naussées','Confusion'],treatments:['Scanner cérébral','Surveillance neuro','Analgesie forte']}],
-jaw:[{key:'fracture_mandibule',label:'Fracture mandibulaire',symptoms:['Douleur mastication','Malocclusion'],treatments:['Scanner facial','Chirurgie maxillo-faciale','Antalgiques']}],
-chest:[{key:'pneumothorax',label:'Pneumothorax',symptoms:['Dyspnée','Douleur thoracique'],treatments:['Radio/Scanner','Drain thoracique','Oxygène']}],
-abdomen:[{key:'visceral',label:'Lésion viscérale',symptoms:['Douleur abdominale','Rigidité'],treatments:['Scanner abdo','Surveillance hémodynamique','Chirurgie si besoin']}],
-pelvis:[{key:'fracture_pelvis',label:'Fracture du bassin',symptoms:['Douleur pelvienne','Instabilité'],treatments:['Immobilisation','Scanner','Stabilisation hémorragique']}],
-left_forearm:[{key:'tendon',label:'Lésion tendineuse',symptoms:['Perte de fonction','Douleur'],treatments:['IRM','Immobilisation','Chirurgie si rupture']}],
-left_hand:[{key:'doigt_fracture',label:'Fracture phalangienne',symptoms:['Douleur locale','Déformation'],treatments:['Radio','Attelle','Antalgique']}],
-left_thigh:[{key:'muscle_thig
+// ===========================
+// FONCTIONS DE BASE
+// ===========================
+function openModal(zone) {
+  if (!zone || !zone.id) return;
+  currentZone = zone;
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+}
+
+function closeModal() {
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
+  currentZone = null;
+}
+
+closeBtn.addEventListener("click", closeModal);
+
+// ===========================
+// ENREGISTREMENT BLESSURE
+// ===========================
+saveBtn.addEventListener("click", () => {
+  if (!currentZone) {
+    console.warn("Aucune zone sélectionnée — modal ignoré");
+    return;
+  }
+
+  const type = typeSelect.value;
+  const pain = parseInt(painInput.value);
+  const symptoms = generateSymptoms(type, pain, currentZone);
+  const treatment = generateTreatment(type, pain, currentZone);
+
+  injuries.push({
+    zone: currentZone.name,
+    type,
+    pain,
+    symptoms,
+    treatment,
+  });
+
+  updateList();
+  closeModal();
+});
+
+// ===========================
+// GÉNÉRATION AUTOMATIQUE
+// ===========================
+function generateSymptoms(type, pain, zone) {
+  let base = [];
+
+  switch (type) {
+    case "arme feu":
+      base = ["Plaie perforante", "Saignement"];
+      if (pain >= 5) base.push("Possible organe touché");
+      break;
+    case "arme blanche":
+      base = ["Entaille", "Saignement modéré"];
+      if (pain >= 5) base.push("Lésion musculaire probable");
+      break;
+    case "contendante":
+      base = ["Hématome", "Douleur localisée"];
+      if (pain >= 7) base.push("Fracture suspectée");
+      break;
+    case "avp":
+      base = ["Traumatisme global", "Douleur généralisée"];
+      if (pain >= 6) base.push("Suspicion de lésions internes");
+      break;
+    case "chute":
+      base = ["Ecchymoses", "Douleur diffuse"];
+      if (pain >= 8) base.push("Risque de fracture ou luxation");
+      break;
+    default:
+      base = ["Douleur localisée"];
+  }
+  return base.join(", ");
+}
+
+function generateTreatment(type, pain, zone) {
+  let treatments = ["Surveillance médicale"];
+
+  if (pain >= 8) treatments.push("Morphine IV", "Imagerie (IRM, Scanner)");
+  else if (pain >= 5) treatments.push("Antalgiques", "Radio de contrôle");
+  else treatments.push("Crème apaisante", "Repos localisé");
+
+  if (type === "arme feu") treatments.push("Extraction de balle", "Suture");
+  if (type === "arme blanche") treatments.push("Désinfection", "Suture fine");
+  if (type === "contendante") treatments.push("Immobilisation", "Bandage");
+  if (type === "avp") treatments.push("Scanner complet", "Mise sous oxygène");
+  if (type === "chute") treatments.push("Radio", "Bilan locomoteur");
+
+  return treatments.join(", ");
+}
+
+// ===========================
+// AFFICHAGE DES BLESSURES
+// ===========================
+function updateList() {
+  injuryList.innerHTML = "";
+  injuries.forEach((injury, index) => {
+    const item = document.createElement("div");
+    item.classList.add("injury-item");
+    item.innerHTML = `
+      <strong>${injury.zone}</strong> — ${injury.type} (Douleur ${injury.pain}/10)<br>
+      <em>Symptômes :</em> ${injury.symptoms}<br>
+      <em>Traitement :</em> ${injury.treatment}
+    `;
+    injuryList.appendChild(item);
+  });
+}
+
+// ===========================
+// EASTER EGG — ENTRE-JAMBE
+// ===========================
+let groinClicks = 0;
+function handleSpecialClick(zone) {
+  if (zone.id === "groin") {
+    groinClicks++;
+    if (groinClicks === 10) {
+      alert("On peut apprendre à se connaître avant non ? Moi c’est Stan, on va au chalet ?");
+      groinClicks = 0;
+    }
+  }
+}
