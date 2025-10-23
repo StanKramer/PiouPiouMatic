@@ -46,7 +46,13 @@
       </select>
 
       <label class="muted">Type de blessure</label>
-      <select id="modalType" class="input"></select>
+      <select id="modalType" class="input">
+        <option value="contendante">Contondante</option>
+        <option value="arme feu">Arme à feu</option>
+        <option value="arme blanche">Arme blanche</option>
+        <option value="avp">Accident véhicule</option>
+        <option value="chute">Chute</option>
+      </select>
 
       <label class="muted">Douleur (1–10)</label>
       <input id="modalPain" type="range" min="1" max="10" value="5" class="range" />
@@ -69,32 +75,5 @@
 </div>
 
 <script src="script.js"></script>
-<script>
-  // Assurer que le modal est caché au chargement
-  const modal = document.getElementById("modal");
-  document.addEventListener("DOMContentLoaded", () => {
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
-  });
-
-  // Exemple d'ouverture du modal uniquement au clic sur une zone
-  const hotspots = document.querySelectorAll(".hotspot");
-  hotspots.forEach((spot) => {
-    spot.addEventListener("click", () => {
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
-
-      // Affiche la zone sélectionnée dans le modal
-      const partName = spot.title || spot.dataset.zone;
-      document.getElementById("modalPart").textContent = "Partie: " + partName;
-    });
-  });
-
-  // Fermeture du modal
-  document.getElementById("modalCancel").addEventListener("click", () => {
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
-  });
-</script>
 </body>
 </html>
