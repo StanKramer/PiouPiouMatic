@@ -1,25 +1,22 @@
 // ===========================
-// PiouPiouMatic Diagnostic UI
+// PiouPiouMatic Diagnostic UI - Version modal au clic
 // ===========================
 
 // RÉFÉRENCES DOM
-const bodyMap = document.getElementById("body-map");
-const modal = document.getElementById("injury-modal");
-const typeSelect = document.getElementById("injury-type");
-const painInput = document.getElementById("pain-level");
-const saveBtn = document.getElementById("save-injury");
-const closeBtn = document.getElementById("close-modal");
-const injuryList = document.getElementById("injury-list");
+const bodyMap = document.getElementById("hotspotLayer");
+const modal = document.getElementById("modal");
+const modalPart = document.getElementById("modalPart");
+const modalCancel = document.getElementById("modalCancel");
+const modalAdd = document.getElementById("modalAdd");
+const modalType = document.getElementById("modalType");
+const modalPain = document.getElementById("modalPain");
+const modalPainLabel = document.getElementById("modalPainLabel");
+const modalSymptoms = document.getElementById("modalSymptoms");
+const modalTreatments = document.getElementById("modalTreatments");
+const injuryList = document.getElementById("injuryList");
 
 let injuries = [];
 let currentZone = null;
-
-// Empêche le modal de s’afficher au démarrage
-document.addEventListener("DOMContentLoaded", () => {
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
-  currentZone = null;
-});
 
 // ===========================
 // DÉFINITION DES ZONES
@@ -39,7 +36,9 @@ const zones = [
   { id: "groin", name: "Entre-jambe", x: "49%", y: "54%" },
 ];
 
-// Ajout dynamique des hotspots
+// ===========================
+// AJOUT DYNAMIQUE DES HOTSPOTS
+// ===========================
 zones.forEach((zone) => {
   const spot = document.createElement("div");
   spot.classList.add("hotspot");
@@ -48,46 +47,59 @@ zones.forEach((zone) => {
   spot.dataset.zone = zone.id;
   spot.title = zone.name;
 
-  // Clic sur zone → ouvre le modal
+  // clic sur zone → ouvre le modal
   spot.addEventListener("click", () => {
-    openModal(zone);
-    handleSpecialClick(zone);
+    currentZone = zone;
+    modalPart.textContent = "Partie: " + zone.name;
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    updateModalFields();
   });
 
   bodyMap.appendChild(spot);
 });
 
 // ===========================
-// FONCTIONS DE BASE
+// INITIALISATION DU MODAL
 // ===========================
-function openModal(zone) {
-  if (!zone || !zone.id) return;
-  currentZone = zone;
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
+function updateModalFields() {
+  modalPain.value = 5;
+  modalPainLabel.textContent = "5";
+  modalType.innerHTML = `
+    <option value="arme feu">Arme à feu</option>
+    <option value="arme blanche">Arme blanche</option>
+    <option value="contendante">Contondante</option>
+    <option value="avp">Accident véhicule</option>
+    <option value="chute">Chute</option>
+  `;
+  modalSymptoms.textContent = "—";
+  modalTreatments.textContent = "—";
 }
 
-function closeModal() {
+// Mise à jour de l'affichage de la douleur
+modalPain.addEventListener("input", () => {
+  modalPainLabel.textContent = modalPain.value;
+});
+
+// ===========================
+// FERMETURE DU MODAL
+// ===========================
+modalCancel.addEventListener("click", () => {
   modal.classList.add("hidden");
   modal.classList.remove("flex");
   currentZone = null;
-}
-
-closeBtn.addEventListener("click", closeModal);
+});
 
 // ===========================
-// ENREGISTREMENT BLESSURE
+// AJOUT DE BLESSURE
 // ===========================
-saveBtn.addEventListener("click", () => {
-  if (!currentZone) {
-    console.warn("Aucune zone sélectionnée — modal ignoré");
-    return;
-  }
+modalAdd.addEventListener("click", () => {
+  if (!currentZone) return;
 
-  const type = typeSelect.value;
-  const pain = parseInt(painInput.value);
-  const symptoms = generateSymptoms(type, pain, currentZone);
-  const treatment = generateTreatment(type, pain, currentZone);
+  const type = modalType.value;
+  const pain = parseInt(modalPain.value);
+  const symptoms = generateSymptoms(type, pain);
+  const treatment = generateTreatment(type, pain);
 
   injuries.push({
     zone: currentZone.name,
@@ -97,16 +109,17 @@ saveBtn.addEventListener("click", () => {
     treatment,
   });
 
-  updateList();
-  closeModal();
+  updateInjuryList();
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
+  currentZone = null;
 });
 
 // ===========================
 // GÉNÉRATION AUTOMATIQUE
 // ===========================
-function generateSymptoms(type, pain, zone) {
+function generateSymptoms(type, pain) {
   let base = [];
-
   switch (type) {
     case "arme feu":
       base = ["Plaie perforante", "Saignement"];
@@ -134,9 +147,8 @@ function generateSymptoms(type, pain, zone) {
   return base.join(", ");
 }
 
-function generateTreatment(type, pain, zone) {
+function generateTreatment(type, pain) {
   let treatments = ["Surveillance médicale"];
-
   if (pain >= 8) treatments.push("Morphine IV", "Imagerie (IRM, Scanner)");
   else if (pain >= 5) treatments.push("Antalgiques", "Radio de contrôle");
   else treatments.push("Crème apaisante", "Repos localisé");
@@ -153,30 +165,4 @@ function generateTreatment(type, pain, zone) {
 // ===========================
 // AFFICHAGE DES BLESSURES
 // ===========================
-function updateList() {
-  injuryList.innerHTML = "";
-  injuries.forEach((injury, index) => {
-    const item = document.createElement("div");
-    item.classList.add("injury-item");
-    item.innerHTML = `
-      <strong>${injury.zone}</strong> — ${injury.type} (Douleur ${injury.pain}/10)<br>
-      <em>Symptômes :</em> ${injury.symptoms}<br>
-      <em>Traitement :</em> ${injury.treatment}
-    `;
-    injuryList.appendChild(item);
-  });
-}
-
-// ===========================
-// EASTER EGG — ENTRE-JAMBE
-// ===========================
-let groinClicks = 0;
-function handleSpecialClick(zone) {
-  if (zone.id === "groin") {
-    groinClicks++;
-    if (groinClicks === 10) {
-      alert("On peut apprendre à se connaître avant non ? Moi c’est Stan, on va au chalet ?");
-      groinClicks = 0;
-    }
-  }
-}
+function updateInjuryList
