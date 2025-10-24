@@ -123,6 +123,58 @@ saveBtn.addEventListener("click", () => {
   renderSummary();
 });
 
+/* ================================================================
+   Rendu du résumé médical (panneau de droite)
+================================================================ */
+function renderSummary() {
+  const container = document.getElementById("injury-list");
+  container.innerHTML = "";
+
+  if (injuries.length === 0) {
+    container.innerHTML = "<p>Aucune blessure détectée</p>";
+    return;
+  }
+
+  // Groupe par zone anatomique
+  const grouped = {};
+  injuries.forEach(i => {
+    if (!grouped[i.zone]) grouped[i.zone] = [];
+    grouped[i.zone].push(i);
+  });
+
+  for (const zone in grouped) {
+    const group = grouped[zone];
+    const groupDiv = document.createElement("div");
+    groupDiv.className = "injury-group";
+    const h3 = document.createElement("h3");
+    h3.textContent = zone;
+    groupDiv.appendChild(h3);
+
+    group.forEach(i => {
+      const p = document.createElement("p");
+      p.className = "injury-item";
+      p.textContent = `• ${i.type} (Douleur ${i.pain}/10) — ${i.care}`;
+      groupDiv.appendChild(p);
+    });
+
+    container.appendChild(groupDiv);
+  }
+
+  // Recalcul de la facturation et affichage
+  const opts = { reviveOutside: false, reviveLocation: "none", publicAgent: false };
+  const billing = calculateBilling(injuries, opts);
+  const factDiv = document.createElement("div");
+  factDiv.className = "billing-info";
+  factDiv.innerHTML = `
+    <hr>
+    <h4>💰 Facturation</h4>
+    ${billing.details.map(d => `<p>${d}</p>`).join("")}
+    <p><strong>Total :</strong> ${billing.total.toLocaleString()}$</p>
+    ${billing.recapHTML}
+  `;
+  container.appendChild(factDiv);
+}
+
 /* ---------- Coordonnées hotspots ---------- */
 let ZONES = [
   { id: "head", x: 256, y: 80, name: "Tête", tags: ["head","front"] },
