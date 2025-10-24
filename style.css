@@ -1,279 +1,43 @@
-/* ===============================================================
-   PiouPiouMatic RP - Interface Médicale
-   Thème hospitalier moderne
-================================================================= */
-
-body {
-  margin: 0;
-  background: #0b0f14;
-  color: #e6edf3;
-  font-family: "Segoe UI", Arial, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow-x: hidden;
-}
-
-/* ---------- Bandeau supérieur ---------- */
-.header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 60px;
-  background: linear-gradient(180deg, rgba(20,25,33,0.95) 0%, rgba(10,15,20,0.85) 100%);
-  border-bottom: 1px solid rgba(80,120,180,0.2);
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0 15px;
-  backdrop-filter: blur(6px);
-  z-index: 9999;
-}
-.header::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 3px;
-  height: 100%;
-  background: linear-gradient(180deg, #00c3ff, #0055ff);
-  box-shadow: 0 0 8px rgba(0,153,255,0.7);
-}
-
-/* ---------- Logo animé ---------- */
-.logo {
-  position: relative;
-  height: 42px;
-  width: auto;
-  object-fit: contain;
-  animation: logoPulse 5s infinite ease-in-out;
-  filter: drop-shadow(0 0 6px rgba(144, 194, 255, 0.4));
-  transition: transform 0.3s ease, filter 0.3s ease;
-}
-.logo:hover { transform: scale(1.05); filter: drop-shadow(0 0 16px rgba(144, 194, 255, 0.6)); }
-
-/* --- Halo pulsant (rose → bleu) --- */
-@keyframes logoPulse {
-  0% { filter: drop-shadow(0 0 8px rgba(255,128,200,0.4)); }
-  50% { filter: drop-shadow(0 0 16px rgba(100,180,255,0.8)); transform: scale(1.02); }
-  100% { filter: drop-shadow(0 0 8px rgba(255,128,200,0.4)); }
-}
-
-/* --- Balayage lumineux --- */
-.logo::after {
-  content: "";
-  position: absolute;
-  top: 0; left: -150%;
-  width: 50%; height: 100%;
-  background: linear-gradient(120deg, transparent 0%, rgba(173,216,255,0.3) 40%, transparent 100%);
-  transform: skewX(-20deg);
-  animation: logoScan 10s infinite;
-}
-@keyframes logoScan {
-  0% { left: -150%; opacity: 0; }
-  10% { opacity: 1; }
-  50% { left: 150%; opacity: 1; }
-  100% { opacity: 0; left: 150%; }
-}
-
-/* ---------- Statut à droite du logo ---------- */
-.system-status {
-  margin-left: 15px;
-  color: #9dd1ff;
-  font-size: 1rem;
-  text-shadow: 0 0 8px rgba(80,180,255,0.6);
-  animation: fadeStatus 2s infinite;
-}
-@keyframes fadeStatus {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
-/* ---------- Zone principale ---------- */
-main {
-  display: flex;
-  gap: 1rem;
-  width: 92%;
-  max-width: 1400px;
-  margin-top: 80px;
-}
 #body-map {
   position: relative;
   flex: 2;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
+
 #body-image {
   height: 100vh;
   width: auto;
   max-width: 100%;
   object-fit: contain;
-  border-radius: 8px;
   display: block;
+  border-radius: 8px;
 }
 
-/* ---------- Hotspots ---------- */
 .hotspot {
   position: absolute;
-  width: 40px; height: 40px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.3);
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition: transform 0.2s, background 0.2s;
   transform: translate(-50%, -50%);
 }
-.hotspot:hover {
-  background: rgba(255,255,255,0.25);
-  transform: translate(-50%, -50%) scale(1.05);
-}
+.hotspot:hover { background: rgba(255,255,255,0.3); transform: translate(-50%, -50%) scale(1.1); }
 
-/* ---------- Panneau blessures ---------- */
-#injury-panel {
-  flex: 1;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  padding: 1rem;
-  overflow-y: auto;
-  max-height: 85vh;
-  backdrop-filter: blur(4px);
-}
-.injury-group { margin-bottom: 1rem; }
-.injury-group h3 {
-  margin: 0.5rem 0;
-  color: #90c2ff;
-  border-bottom: 1px dashed rgba(255,255,255,0.15);
-  padding-bottom: 0.25rem;
-}
-.injury-item + .injury-item { border-top: 1px solid rgba(255,255,255,0.06); }
-
-/* ---------- Boutons ---------- */
-button {
-  padding: 0.55rem 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #1b2330;
-  color: #e6edf3;
-}
-button.primary { background: #2d6df6; color: white; }
-button.secondary {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.15);
-  color: #9dd1ff;
-  transition: background 0.2s, border 0.2s;
-}
-button.secondary:hover {
-  background: rgba(255,255,255,0.12);
-  border-color: rgba(255,255,255,0.3);
-}
-#reset-btn {
-  width: 100%;
-  margin-bottom: 0.8rem;
-  padding: 0.6rem;
-  border-radius: 10px;
-}
-
-/* ---------- Modale ---------- */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-.hidden { display: none !important; }
-.modal-content {
-  background: #121821;
-  padding: 1.2rem 1.4rem;
-  border-radius: 12px;
-  width: 420px;
-  border: 1px solid rgba(255,255,255,0.08);
-}
-.buttons { margin-top: 1rem; display: flex; justify-content: flex-end; gap: 0.5rem; }
-
-/* ---------- Texte diagnostic ---------- */
-.symptoms, .treatment, .advice { margin-top: 0.8rem; font-size: 0.9rem; }
-.advanced-details { margin-top: 0.8rem; font-size: 0.85rem; color: #9dbad8; font-style: italic; }
-
-/* ---------- Code Bleu Overlay ---------- */
-.code-blue-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(255, 0, 0, 0.25);
-  backdrop-filter: blur(3px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ff4444;
-  font-size: 2rem;
-  font-weight: bold;
-  text-shadow: 0 0 15px #ff0000;
-  z-index: 999999;
-  opacity: 0;
-  animation: codeBlueFlash 0.3s forwards;
-}
-@keyframes codeBlueFlash {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* ---------- Sons et notifications ---------- */
-.sound-btn {
-  position: fixed;
-  top: 10px;
-  right: 15px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 50%;
-  font-size: 1.4rem;
-  color: #90c2ff;
-  width: 42px; height: 42px;
-  display: flex; align-items: center; justify-content: center;
-  backdrop-filter: blur(4px);
-  z-index: 99999;
-}
-.sound-btn:hover { background: rgba(255,255,255,0.15); }
-
-/* ---------- Effets visuels Easter Eggs ---------- */
-.broken-heart, .idea-bulb {
-  position: fixed;
-  font-size: 3rem;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  opacity: 0.9;
-  z-index: 9999;
-}
-.broken-heart { animation: heartBreak 1.5s ease-out forwards; }
-.idea-bulb { animation: bulbPop 1.5s ease-out forwards; }
-@keyframes heartBreak {
-  0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-  50% { transform: translate(-50%, -70%) scale(1.6); opacity: 0.8; }
-  100% { transform: translate(-50%, -90%) scale(0.5); opacity: 0; }
-}
-@keyframes bulbPop {
-  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-  30% { transform: translate(-50%, -60%) scale(1.3); opacity: 1; }
-  100% { transform: translate(-50%, -80%) scale(0.6); opacity: 0; }
-}
-
-/* ---------- Mode calibration (Alt + C) ---------- */
-.calib-label {
-  font-size: 10px;
-  font-family: monospace;
-  background: rgba(0,255,255,0.12);
-  border: 1px solid rgba(0,255,255,0.3);
-  color: #bff;
-  border-radius: 6px;
-  padding: 2px 6px;
+.test-label, .calib-label {
   position: absolute;
+  color: #00ffff;
+  font-size: 10px;
   transform: translate(-50%, -100%);
   pointer-events: none;
-  text-shadow: 0 0 4px rgba(0,255,255,0.4);
+  background: rgba(0,255,255,0.1);
+  border: 1px solid rgba(0,255,255,0.4);
+  border-radius: 4px;
+  padding: 1px 4px;
   z-index: 10;
 }
