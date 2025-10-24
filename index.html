@@ -7,33 +7,43 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- Son -->
   <button id="sound-toggle" class="sound-btn" title="Activer/Désactiver le son">🔇</button>
 
+  <!-- Bandeau -->
   <header class="header">
     <img src="logo_pioupioumatic.png" alt="Logo PiouPiouMatic" class="logo" />
     <div class="system-status">🟢 Système prêt — En attente de diagnostic</div>
   </header>
 
+  <!-- Zone principale -->
   <main>
-    <section id="body-map">
+    <!-- Carte du corps -->
+    <section id="body-map" aria-label="Carte du corps">
       <img src="body_both.png" alt="Corps humain — face et dos" id="body-image" />
+      <!-- Hotspots injectés par script.js -->
     </section>
 
-    <aside id="injury-panel">
+    <!-- Panneau latéral -->
+    <aside id="injury-panel" aria-label="Blessures enregistrées">
       <h2>Blessures enregistrées</h2>
       <button id="reset-btn" class="secondary">↻ Réinitialiser</button>
       <button id="recalibrate-btn" class="secondary" title="Relancer la calibration">♻️ Recalibrer</button>
-      <div id="injury-list" class="injury-list">
-        <p>Aucune blessure détectée</p>
+      <div id="injury-list" class="injury-list"><p>Aucune blessure détectée</p></div>
+      <div id="panel-summary" class="panel-summary">
+        <hr>
+        <p>📏 Alignement : <span id="align-status">⚠️ recalibrage requis</span></p>
+        <p>🕒 Dernière calibration : <span id="last-calib">—</span></p>
       </div>
     </aside>
   </main>
 
-  <div id="injury-modal" class="modal hidden" aria-hidden="true">
+  <!-- Modale de saisie -->
+  <div id="injury-modal" class="modal hidden" aria-hidden="true" role="dialog">
     <div class="modal-content">
       <h3 id="zone-title">Nouvelle blessure</h3>
 
-      <label for="injury-type">Type :</label>
+      <label for="injury-type">Type de blessure</label>
       <select id="injury-type">
         <option value="arme feu">Arme à feu</option>
         <option value="arme blanche">Arme blanche</option>
@@ -49,17 +59,56 @@
         <option value="chute">Chute</option>
       </select>
 
-      <label for="pain-level">Douleur :</label>
+      <label for="pain-level">Douleur (1–10)</label>
       <div class="range-line">
         <input type="range" id="pain-level" min="1" max="10" value="5" />
         <span id="pain-value">5</span>
       </div>
 
-      <p><strong>Diagnostic :</strong> <span id="diagnosis-text">—</span></p>
-      <p><strong>Symptômes :</strong> <span id="symptom-text">—</span></p>
-      <p><strong>Traitement :</strong> <span id="treatment-text">—</span></p>
-      <p><strong>Conseils :</strong> <span id="advice-text">—</span></p>
-      <p><strong>Détails :</strong> <span id="details-text">—</span></p>
+      <div class="diagnosis"><strong>Diagnostic :</strong> <p id="diagnosis-text">—</p></div>
+      <div class="symptoms"><strong>Symptômes :</strong> <p id="symptom-text">—</p></div>
+      <div class="treatment"><strong>Traitements :</strong> <p id="treatment-text">—</p></div>
+      <div class="advice"><strong>Conseils :</strong> <p id="advice-text">—</p></div>
+      <div class="advanced-details"><strong>Détails de procédure :</strong> <p id="details-text">—</p></div>
+
+      <hr>
+      <!-- Options RP impactant facturation -->
+      <fieldset class="billing-group">
+        <legend>💵 Facturation — Options</legend>
+
+        <label class="chk">
+          <input type="checkbox" id="is-public-agent" />
+          Agent des services publics (–50% total)
+        </label>
+
+        <label class="chk">
+          <input type="checkbox" id="ext-revive" />
+          Réanimation à l’extérieur
+        </label>
+        <label for="revive-zone" class="sub">
+          Zone de réanimation
+          <select id="revive-zone">
+            <option value="ls">Los Santos (+1 500$)</option>
+            <option value="bc">Blaine County (+2 000$)</option>
+            <option value="cp">Cayo Perico (+3 000$)</option>
+          </select>
+        </label>
+
+        <div class="sub">
+          <label class="chk">
+            <input type="checkbox" id="svc-hospital" />
+            Soins hospitaliers (Hôpital +800$)
+          </label>
+          <label class="chk">
+            <input type="checkbox" id="svc-boat" />
+            Intervention Bateau (+2 000$)
+          </label>
+          <label class="chk">
+            <input type="checkbox" id="svc-heli" />
+            Intervention Hélicoptère (+3 000$)
+          </label>
+        </div>
+      </fieldset>
 
       <div class="buttons">
         <button id="close-modal">Annuler</button>
@@ -68,13 +117,13 @@
     </div>
   </div>
 
-  <!--  Popup de calibration RP  -->
+  <!-- Popup Calibration RP -->
   <div id="calibration-overlay" class="calib-overlay hidden" role="dialog" aria-modal="true">
     <div class="calib-card">
       <h3>🩺 Calibration requise</h3>
       <p id="calib-instructions">
-        Vise le <strong>centre vital</strong> de PiouPiou (vue de face,entre-jambes),<br />
-        puis vise le <strong>point secret dorsal</strong> de PiouPiou (vue de dos,sa petite raie).
+        Vise le <strong>centre vital</strong> de PiouPiou (vue de face),<br />
+        puis vise le <strong>point secret dorsal</strong> de PiouPiou (vue de dos).
       </p>
       <div class="calib-actions">
         <button id="calib-cancel" class="secondary">Ignorer</button>
