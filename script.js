@@ -200,3 +200,41 @@ window.addEventListener("load", () => {
     };
   }
 });
+
+// ==========================
+// PATCH anti-ouverture auto
+// ==========================
+
+// 1. Force la fermeture du modal dès le chargement
+window.addEventListener("DOMContentLoaded", () => {
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.style.display = "none";
+    modal.setAttribute("aria-hidden", "true");
+  }
+  if (typeof currentHotspot !== "undefined") currentHotspot = null;
+});
+
+// 2. Bloque toute ouverture sans clic utilisateur
+const _openModalForHotspot = typeof openModalForHotspot === "function" ? openModalForHotspot : null;
+if (_openModalForHotspot) {
+  window.openModalForHotspot = function (h) {
+    // Ne pas ouvrir si aucun vrai clic n’a eu lieu
+    if (!h || !h.id || !h.zone) return;
+    // Sinon comportement normal
+    _openModalForHotspot(h);
+  };
+}
+
+// 3. Supprime tout appel automatique à openModal ou openModalForHotspot
+if (typeof openModal === "function") {
+  const _origOpen = openModal;
+  window.openModal = function (zone) {
+    // Ne rien faire sans interaction manuelle
+    if (!zone || !zone.id) return;
+    _origOpen(zone);
+  };
+}
+
+// 4. (optionnel) log de debug
+console.log("✅ Patch anti-popup automatique actif — modal désactivé tant qu’aucune zone n’est cliquée");
