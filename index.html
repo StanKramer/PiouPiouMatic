@@ -130,7 +130,76 @@
       </div>
     </div>
   </div>
+<!-- === Mode Calibrage visuel (temporaire) === -->
+<script>
+let calibrating = false;
+const clickedPoints = [];
+const zoneName = document.createElement("input");
+zoneName.placeholder = "Nom de la zone (ex: tête, cou, genou)";
+zoneName.style.position = "fixed";
+zoneName.style.top = "10px";
+zoneName.style.left = "10px";
+zoneName.style.zIndex = "99999";
+zoneName.style.padding = "6px";
+zoneName.style.fontSize = "14px";
+zoneName.style.borderRadius = "6px";
+zoneName.style.border = "1px solid #0ff";
+zoneName.style.background = "rgba(0,0,0,0.8)";
+zoneName.style.color = "#0ff";
+document.body.appendChild(zoneName);
 
+const exportBtn = document.createElement("button");
+exportBtn.textContent = "Exporter ZONES";
+exportBtn.style.position = "fixed";
+exportBtn.style.top = "10px";
+exportBtn.style.left = "230px";
+exportBtn.style.zIndex = "99999";
+exportBtn.style.padding = "6px 10px";
+exportBtn.style.fontSize = "14px";
+exportBtn.style.borderRadius = "6px";
+exportBtn.style.background = "#0ff";
+exportBtn.style.color = "#000";
+document.body.appendChild(exportBtn);
+
+imgEl.style.cursor = "crosshair";
+imgEl.addEventListener("click", e => {
+  const rect = imgEl.getBoundingClientRect();
+  const scaleX = rect.width / 1024;
+  const scaleY = rect.height / 1024;
+  const x = Math.round((e.clientX - rect.left) / scaleX);
+  const y = Math.round((e.clientY - rect.top) / scaleY);
+  if (!zoneName.value) {
+    alert("⚠️ Entrez un nom de zone avant de cliquer !");
+    return;
+  }
+  clickedPoints.push({ name: zoneName.value, x, y });
+  console.log(`Point ajouté: ${zoneName.value} → x:${x}, y:${y}`);
+  const dot = document.createElement("div");
+  dot.style.position = "absolute";
+  dot.style.left = e.clientX + "px";
+  dot.style.top = e.clientY + "px";
+  dot.style.width = "10px";
+  dot.style.height = "10px";
+  dot.style.borderRadius = "50%";
+  dot.style.background = "cyan";
+  dot.style.zIndex = "9999";
+  dot.style.pointerEvents = "none";
+  document.body.appendChild(dot);
+});
+
+exportBtn.addEventListener("click", () => {
+  let out = "const ZONES = [\n";
+  clickedPoints.forEach(p => {
+    out += `  { name: "${p.name}", x: ${p.x}, y: ${p.y} },\n`;
+  });
+  out += "];";
+  console.log(out);
+  navigator.clipboard.writeText(out);
+  alert("✅ Coordonnées copiées dans le presse-papiers !");
+});
+</script>
+
+  
   <script src="script.js"></script>
 </body>
 </html>
