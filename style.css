@@ -5,7 +5,6 @@ body {
   color: #e8f1f8;
 }
 
-/* --- Bandeau --- */
 .header {
   display: flex;
   align-items: center;
@@ -14,40 +13,29 @@ body {
   border-bottom: 1px solid rgba(0,255,255,0.2);
   box-shadow: 0 0 10px rgba(0,255,255,0.1);
 }
-.logo {
-  width: 60px; height: 60px;
-  cursor: pointer; margin-right: 15px;
-}
+.logo { width: 60px; height: 60px; cursor: pointer; margin-right: 15px; }
 .logo img {
-  width: 100%; height: 100%;
-  border-radius: 50%;
+  width: 100%; height: 100%; border-radius: 50%;
   box-shadow: 0 0 10px rgba(0,255,255,0.4);
   transition: transform 0.3s ease;
 }
 .logo img:hover { transform: scale(1.1); }
 .header h1 {
-  color: #0ff;
-  font-size: 1.6rem;
+  color: #0ff; font-size: 1.6rem;
   text-shadow: 0 0 6px rgba(0,255,255,0.4);
 }
 
-/* --- Disposition --- */
-.container {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 20px;
-}
+.container { display: flex; justify-content: space-between; gap: 20px; padding: 20px; }
 .body-section { flex: 2; text-align: center; }
-#body-map { position: relative; display: inline-block; }
+#body-map { position: relative; display: inline-block; z-index: 1; }
 #body-image {
   max-width: 100%;
   height: auto;
+  display: block;
   border-radius: 10px;
   box-shadow: 0 0 25px rgba(0,255,255,0.2);
 }
 
-/* --- Hotspots --- */
 .hotspot {
   position: absolute;
   width: 28px; height: 28px;
@@ -55,14 +43,13 @@ body {
   background: rgba(0,255,255,0.25);
   border: 1px solid rgba(0,255,255,0.8);
   cursor: pointer;
-  transition: all 0.2s ease;
+  z-index: 10;
 }
 .hotspot:hover {
   transform: scale(1.2);
   background: rgba(0,255,255,0.5);
 }
 
-/* --- Panneau résumé --- */
 #injury-panel {
   flex: 1;
   background: #181c22;
@@ -73,14 +60,12 @@ body {
   overflow-y: auto;
 }
 #injury-panel h2 { color: #0ff; text-align: center; }
-.injury-group h3 { color: #9df; margin-bottom: 4px; }
+.injury-group h3 { color: #9df; }
 .injury-item { margin-left: 12px; font-size: 0.9rem; }
 .injury-total { color: #9df; font-size: 0.9rem; }
 .billing-info h4 { color: #ffd580; }
-.billing-info p strong { color: #fff; }
-.signature { text-align: center; margin-top: 5px; color: #9df; }
+.signature { text-align: center; color: #9df; }
 
-/* --- Modal --- */
 .modal {
   position: fixed; top: 0; left: 0;
   width: 100%; height: 100%;
@@ -102,6 +87,4 @@ body {
   border-radius: 6px; padding: 6px 12px;
   margin: 4px; font-weight: 600; cursor: pointer;
 }
-.modal-buttons button:hover {
-  background: #09f; color: #fff;
-}
+.modal-buttons button:hover { background: #09f; color: #fff; }
