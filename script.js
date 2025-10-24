@@ -1,7 +1,6 @@
 /* ================================================================
-   PiouPiouMatic RP - Version sans calibration
-   Hotspots en coordonnées absolues (pixels réels)
-   Image : body_both.png — 1024x1024px
+   PiouPiouMatic RP - Version stable sans calibration
+   Hotspots alignés (pixels réels) pour body_both.png (1024x1024)
 ================================================================ */
 
 /* ---------- Références DOM ---------- */
@@ -19,15 +18,16 @@ const detailsText = document.getElementById("details-text");
 const saveBtn = document.getElementById("save-injury");
 const closeBtn = document.getElementById("close-modal");
 const injuryList = document.getElementById("injury-list");
-const recalibrateBtn = document.getElementById("recalibrate-btn"); // inutilisé maintenant
+const alignStatus = document.getElementById("align-status");
+const lastCalib = document.getElementById("last-calib");
 
 /* ---------- Constantes image ---------- */
 const IMG_WIDTH = 1024;
 const IMG_HEIGHT = 1024;
 
-/* ---------- Données anatomiques (pixels) ---------- */
+/* ---------- Coordonnées fixes des zones anatomiques ---------- */
 const ZONES = [
-  // --- Vue de face (gauche de l'image, x≈0–512) ---
+  // Face
   { id: "head", x: 256, y: 80, name: "Tête", tags: ["head","front"] },
   { id: "face", x: 256, y: 140, name: "Visage", tags: ["head","front"] },
   { id: "neck", x: 256, y: 190, name: "Cou", tags: ["neck","front"] },
@@ -49,7 +49,7 @@ const ZONES = [
   { id: "footL", x: 235, y: 880, name: "Pied gauche", tags: ["foot","front"] },
   { id: "footR", x: 277, y: 880, name: "Pied droit", tags: ["foot","front"] },
 
-  // --- Vue de dos (droite de l'image, x≈512–1024) ---
+  // Dos
   { id: "headBack", x: 768, y: 80, name: "Crâne (dos)", tags: ["head","back"] },
   { id: "nape", x: 768, y: 150, name: "Nuque", tags: ["neck","back"] },
   { id: "shoulderBackL", x: 715, y: 210, name: "Épaule gauche (dos)", tags: ["shoulder","back"] },
@@ -69,7 +69,7 @@ const ZONES = [
 ];
 
 /* ================================================================
-   Hotspots absolus
+   Hotspots absolus (coordonnées fixes)
 ================================================================ */
 function createHotspot(zone) {
   const s = document.createElement("div");
@@ -106,8 +106,11 @@ function positionHotspots() {
 ["resize", "scroll"].forEach(evt => window.addEventListener(evt, positionHotspots));
 
 /* ================================================================
-   Moteur médical simplifié (inchangé)
+   Moteur médical simplifié
 ================================================================ */
+let injuries = [];
+let currentZone = null;
+
 function openModal(zone) {
   currentZone = zone;
   modal.classList.remove("hidden");
@@ -128,7 +131,7 @@ function updateDiagnosis() {
   symptomText.textContent = "Douleur localisée, inflammation probable.";
   treatmentText.textContent = "Antalgique, désinfection, repos.";
   adviceText.textContent = "Surveillance 24–48 h.";
-  detailsText.textContent = "Procédure: nettoyage, contrôle douleur, imagerie si nécessaire.";
+  detailsText.textContent = "Procédure : nettoyage, contrôle douleur, imagerie si nécessaire.";
 }
 painLevel.addEventListener("input", () => {
   painValue.textContent = painLevel.value;
@@ -136,10 +139,107 @@ painLevel.addEventListener("input", () => {
 });
 injuryType.addEventListener("change", updateDiagnosis);
 
+saveBtn.addEventListener("click", () => {
+  if (!currentZone) return;
+  injuries.unshift({
+    zone: currentZone.name,
+    type: injuryType.value,
+    pain: painLevel.value
+  });
+  renderInjuries();
+  closeModalWindow();
+});
+
 /* ================================================================
-   Initialisation
+   Convalescence + Facturation sur résumé
 ================================================================ */
+function computeSeverity(type) {
+  if (["contondante", "chute", "entorse"].includes(type)) return 1;
+  if (["arme blanche", "morsure", "ecrasement"].includes(type)) return 2;
+  if (["fracture", "luxation", "perforation"].includes(type)) return 3;
+  if (["brulure", "avp"].includes(type)) return 4;
+  if (["arme feu"].includes(type)) return 5;
+  return 1;
+}
+
+function computeRecovery(injuries, loc = "exterieur") {
+  if (injuries.length === 0) return "0 min";
+  let max = 0;
+  for (const i of injuries) {
+    const sev = computeSeverity(i.type);
+    const pain = parseInt(i.pain, 10);
+    const m = loc === "chambre"
+      ? Math.min(sev * pain * 0.5, 30)
+      : Math.min(Math.max(sev * pain * 10, 10), 1440);
+    if (m > max) max = m;
+  }
+  const h = Math.floor(max / 60);
+  const min = Math.round(max % 60);
+  return h > 0 ? `${h} h ${min} min` : `${min} min`;
+}
+
+function calculateBilling(injuries) {
+  let total = 800;
+  const details = ["Base hospitalière : 800$"];
+  for (const i of injuries) {
+    switch (i.type) {
+      case "arme feu": total += 5000; details.push("IRM : 5 000$"); break;
+      case "fracture": total += 4300; details.push("Plâtre + Radio : 4 300$"); break;
+      case "brulure": total += 1000; details.push("Pansement / Bandage : 1 000$"); break;
+      case "arme blanche": total += 800; details.push("Sutures : 800$"); break;
+      case "luxation": total += 1000; details.push("Attelle : 1 000$"); break;
+      case "chute": total += 3000; details.push("Scanner : 3 000$"); break;
+      default: total += 1000; details.push("Trousse de soin : 1 000$");
+    }
+  }
+  return { total, details };
+}
+
+function renderInjuries() {
+  if (injuries.length === 0) {
+    injuryList.innerHTML = "<p>Aucune blessure détectée</p>";
+    return;
+  }
+
+  injuryList.innerHTML = injuries
+    .map(i => `<div class='injury-item'><strong>${i.zone}</strong> — ${i.type} (Douleur ${i.pain}/10)</div>`)
+    .join("");
+
+  const recIn = computeRecovery(injuries, "chambre");
+  const recOut = computeRecovery(injuries, "exterieur");
+  const bill = calculateBilling(injuries);
+
+  injuryList.innerHTML += `
+    <div class="injury-total">
+      <hr>
+      <p>🏥 <strong>Convalescence en chambre :</strong> ${recIn}</p>
+      <p>🌄 <strong>Convalescence en extérieur :</strong> ${recOut}</p>
+    </div>
+    <div class="billing-info">
+      <hr>
+      <h4>💰 Facturation RP</h4>
+      ${bill.details.map(d => `<p>${d}</p>`).join("")}
+      <p><strong>Total : ${bill.total.toLocaleString()}$</strong></p>
+    </div>
+  `;
+}
+
+/* ================================================================
+   Réinitialisation + Initialisation
+================================================================ */
+document.getElementById("reset-btn").addEventListener("click", () => {
+  injuries = [];
+  renderInjuries();
+  alert("🩺 Système réinitialisé.");
+});
+
 window.addEventListener("DOMContentLoaded", () => {
   refreshHotspots();
+  renderInjuries();
   imgEl.addEventListener("load", positionHotspots);
+  if (alignStatus) alignStatus.textContent = "✅ alignés";
+  if (lastCalib) {
+    const d = new Date();
+    lastCalib.textContent = `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+  }
 });
