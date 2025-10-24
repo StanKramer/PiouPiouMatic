@@ -7,25 +7,19 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Toggle audio -->
   <button id="sound-toggle" class="sound-btn" title="Activer/Désactiver le son">🔇</button>
 
-  <!-- Bandeau -->
   <header class="header">
     <img src="logo_pioupioumatic.png" alt="Logo PiouPiouMatic" class="logo" />
     <div class="system-status">🟢 Système prêt — En attente de diagnostic</div>
   </header>
 
-  <!-- Zone principale -->
   <main>
-    <!-- Carte du corps -->
-    <section id="body-map" aria-label="Carte du corps">
+    <section id="body-map">
       <img src="body_both.png" alt="Corps humain — face et dos" id="body-image" />
-      <!-- Hotspots ajoutés par script.js -->
     </section>
 
-    <!-- Panneau latéral -->
-    <aside id="injury-panel" aria-label="Blessures enregistrées">
+    <aside id="injury-panel">
       <h2>Blessures enregistrées</h2>
       <button id="reset-btn" class="secondary">↻ Réinitialiser</button>
       <button id="recalibrate-btn" class="secondary" title="Relancer la calibration">♻️ Recalibrer</button>
@@ -35,12 +29,11 @@
     </aside>
   </main>
 
-  <!-- Modale de saisie de blessure -->
-  <div id="injury-modal" class="modal hidden" aria-hidden="true" role="dialog">
+  <div id="injury-modal" class="modal hidden" aria-hidden="true">
     <div class="modal-content">
       <h3 id="zone-title">Nouvelle blessure</h3>
 
-      <label for="injury-type">Type de blessure</label>
+      <label for="injury-type">Type :</label>
       <select id="injury-type">
         <option value="arme feu">Arme à feu</option>
         <option value="arme blanche">Arme blanche</option>
@@ -56,17 +49,17 @@
         <option value="chute">Chute</option>
       </select>
 
-      <label for="pain-level">Douleur (1–10)</label>
+      <label for="pain-level">Douleur :</label>
       <div class="range-line">
         <input type="range" id="pain-level" min="1" max="10" value="5" />
         <span id="pain-value">5</span>
       </div>
 
-      <div class="diagnosis"><strong>Diagnostic :</strong> <p id="diagnosis-text">—</p></div>
-      <div class="symptoms"><strong>Symptômes :</strong> <p id="symptom-text">—</p></div>
-      <div class="treatment"><strong>Traitements :</strong> <p id="treatment-text">—</p></div>
-      <div class="advice"><strong>Conseils :</strong> <p id="advice-text">—</p></div>
-      <div class="advanced-details"><strong>Détails de procédure :</strong> <p id="details-text">—</p></div>
+      <p><strong>Diagnostic :</strong> <span id="diagnosis-text">—</span></p>
+      <p><strong>Symptômes :</strong> <span id="symptom-text">—</span></p>
+      <p><strong>Traitement :</strong> <span id="treatment-text">—</span></p>
+      <p><strong>Conseils :</strong> <span id="advice-text">—</span></p>
+      <p><strong>Détails :</strong> <span id="details-text">—</span></p>
 
       <div class="buttons">
         <button id="close-modal">Annuler</button>
@@ -75,13 +68,13 @@
     </div>
   </div>
 
-  <!-- Popup de calibration semi-automatique -->
-  <div id="calibration-overlay" class="calib-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="calib-title">
+  <!--  Popup de calibration RP  -->
+  <div id="calibration-overlay" class="calib-overlay hidden" role="dialog" aria-modal="true">
     <div class="calib-card">
-      <h3 id="calib-title">🩺 Calibration requise</h3>
+      <h3>🩺 Calibration requise</h3>
       <p id="calib-instructions">
-        Vise le <strong>centre vital</strong> de PiouPiou (vue de face).<br/>
-        Puis vise le <strong>point secret dorsal</strong> de PiouPiou (vue de dos).
+        Vise le <strong>centre vital</strong> de PiouPiou (vue de face),<br />
+        puis vise le <strong>point secret dorsal</strong> de PiouPiou (vue de dos).
       </p>
       <div class="calib-actions">
         <button id="calib-cancel" class="secondary">Ignorer</button>
