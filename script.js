@@ -18,6 +18,16 @@ const injuryList = document.getElementById("injuryList");
 let injuries = [];
 let currentZone = null;
 
+// Empêche le modal de s'afficher au chargement
+document.addEventListener("DOMContentLoaded", () => {
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+  currentZone = null;
+});
+
+
 // ===========================
 // DÉFINITION DES ZONES
 // ===========================
