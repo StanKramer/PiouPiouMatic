@@ -3,203 +3,80 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PiouPiouMatic — Interface Médicale</title>
+  <title>PiouPiouMatic RP</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Son -->
-  <button id="sound-toggle" class="sound-btn" title="Activer/Désactiver le son">🔇</button>
 
-  <!-- Bandeau -->
+  <!-- === Bandeau supérieur avec logo === -->
   <header class="header">
-    <img src="logo_pioupioumatic.png" alt="Logo PiouPiouMatic" class="logo" />
-    <div class="system-status">🟢 Système prêt — En attente de diagnostic</div>
+    <div class="logo">
+      <img src="logo_pioupioumatic.png" alt="Logo PiouPiouMatic" />
+    </div>
+    <h1>PiouPiouMatic</h1>
   </header>
 
-  <!-- Zone principale -->
-  <main>
-    <!-- Carte du corps -->
-    <section id="body-map" aria-label="Carte du corps">
-      <img src="body_both.png" alt="Corps humain — face et dos" id="body-image" />
-      <!-- Hotspots injectés par script.js -->
+  <!-- === Conteneur principal === -->
+  <main class="container">
+
+    <!-- === Image corps humain + hotspots === -->
+    <section class="body-section">
+      <div id="body-map">
+        <img id="body-image" src="body_both.png" alt="Corps humain" />
+      </div>
     </section>
 
-    <!-- Panneau latéral -->
-    <aside id="injury-panel" aria-label="Blessures enregistrées">
-      <h2>Blessures enregistrées</h2>
-      <button id="reset-btn" class="secondary">↻ Réinitialiser</button>
-      <button id="recalibrate-btn" class="secondary" title="Relancer la calibration">♻️ Recalibrer</button>
-      <div id="injury-list" class="injury-list"><p>Aucune blessure détectée</p></div>
-      <div id="panel-summary" class="panel-summary">
-        <hr>
-        <p>📏 Alignement : <span id="align-status">⚠️ recalibrage requis</span></p>
-        <p>🕒 Dernière calibration : <span id="last-calib">—</span></p>
+    <!-- === Panneau résumé / diagnostic === -->
+    <aside id="injury-panel">
+      <h2>🩺 Résumé médical</h2>
+      <div id="injury-list">
+        <p>Aucune blessure détectée</p>
+      </div>
+
+      <div class="panel-buttons">
+        <button id="reset-btn">🔄 Réinitialiser</button>
       </div>
     </aside>
+
   </main>
 
-  <!-- Modale de saisie -->
-  <div id="injury-modal" class="modal hidden" aria-hidden="true" role="dialog">
+  <!-- === Fenêtre modale pour diagnostic === -->
+  <div id="injury-modal" class="modal hidden">
     <div class="modal-content">
-      <h3 id="zone-title">Nouvelle blessure</h3>
-
-      <label for="injury-type">Type de blessure</label>
+      <h3 id="zone-title">Blessure — </h3>
+      <label for="injury-type">Type de blessure :</label>
       <select id="injury-type">
-        <option value="arme feu">Arme à feu</option>
-        <option value="arme blanche">Arme blanche</option>
         <option value="contondante">Contondante</option>
+        <option value="arme blanche">Arme blanche</option>
+        <option value="arme feu">Arme à feu</option>
         <option value="fracture">Fracture</option>
-        <option value="brulure">Brûlure</option>
-        <option value="entorse">Entorse</option>
         <option value="luxation">Luxation</option>
-        <option value="morsure">Morsure</option>
-        <option value="ecrasement">Écrasement</option>
-        <option value="perforation">Perforation</option>
-        <option value="avp">Accident de véhicule</option>
+        <option value="brulure">Brûlure</option>
         <option value="chute">Chute</option>
+        <option value="entorse">Entorse</option>
       </select>
 
-      <label for="pain-level">Douleur (1–10)</label>
-      <div class="range-line">
-        <input type="range" id="pain-level" min="1" max="10" value="5" />
-        <span id="pain-value">5</span>
+      <label for="pain-level">Niveau de douleur :</label>
+      <input type="range" id="pain-level" min="1" max="10" value="5" />
+      <span id="pain-value">5</span>/10
+
+      <div class="diagnostic-text">
+        <p id="diagnosis-text"></p>
+        <p id="symptom-text"></p>
+        <p id="treatment-text"></p>
+        <p id="advice-text"></p>
+        <p id="details-text"></p>
       </div>
 
-      <div class="diagnosis"><strong>Diagnostic :</strong> <p id="diagnosis-text">—</p></div>
-      <div class="symptoms"><strong>Symptômes :</strong> <p id="symptom-text">—</p></div>
-      <div class="treatment"><strong>Traitements :</strong> <p id="treatment-text">—</p></div>
-      <div class="advice"><strong>Conseils :</strong> <p id="advice-text">—</p></div>
-      <div class="advanced-details"><strong>Détails de procédure :</strong> <p id="details-text">—</p></div>
-
-      <hr>
-      <!-- Options RP impactant facturation -->
-      <fieldset class="billing-group">
-        <legend>💵 Facturation — Options</legend>
-
-        <label class="chk">
-          <input type="checkbox" id="is-public-agent" />
-          Agent des services publics (–50% total)
-        </label>
-
-        <label class="chk">
-          <input type="checkbox" id="ext-revive" />
-          Réanimation à l’extérieur
-        </label>
-        <label for="revive-zone" class="sub">
-          Zone de réanimation
-          <select id="revive-zone">
-            <option value="ls">Los Santos (+1 500$)</option>
-            <option value="bc">Blaine County (+2 000$)</option>
-            <option value="cp">Cayo Perico (+3 000$)</option>
-          </select>
-        </label>
-
-        <div class="sub">
-          <label class="chk">
-            <input type="checkbox" id="svc-hospital" />
-            Soins hospitaliers (Hôpital +800$)
-          </label>
-          <label class="chk">
-            <input type="checkbox" id="svc-boat" />
-            Intervention Bateau (+2 000$)
-          </label>
-          <label class="chk">
-            <input type="checkbox" id="svc-heli" />
-            Intervention Hélicoptère (+3 000$)
-          </label>
-        </div>
-      </fieldset>
-
-      <div class="buttons">
-        <button id="close-modal">Annuler</button>
-        <button id="save-injury" class="primary">Ajouter</button>
+      <div class="modal-buttons">
+        <button id="save-injury">💾 Enregistrer</button>
+        <button id="close-modal">❌ Fermer</button>
       </div>
     </div>
   </div>
 
-  <!-- Popup Calibration RP -->
-  <div id="calibration-overlay" class="calib-overlay hidden" role="dialog" aria-modal="true">
-    <div class="calib-card">
-      <h3>🩺 Calibration requise</h3>
-      <p id="calib-instructions">
-        Vise le <strong>centre vital</strong> de PiouPiou (vue de face),<br />
-        puis vise le <strong>point secret dorsal</strong> de PiouPiou (vue de dos).
-      </p>
-      <div class="calib-actions">
-        <button id="calib-cancel" class="secondary">Ignorer</button>
-      </div>
-    </div>
-  </div>
-<!-- === Mode Calibrage visuel (temporaire) === -->
-<script>
-let calibrating = false;
-const clickedPoints = [];
-const zoneName = document.createElement("input");
-zoneName.placeholder = "Nom de la zone (ex: tête, cou, genou)";
-zoneName.style.position = "fixed";
-zoneName.style.top = "10px";
-zoneName.style.left = "10px";
-zoneName.style.zIndex = "99999";
-zoneName.style.padding = "6px";
-zoneName.style.fontSize = "14px";
-zoneName.style.borderRadius = "6px";
-zoneName.style.border = "1px solid #0ff";
-zoneName.style.background = "rgba(0,0,0,0.8)";
-zoneName.style.color = "#0ff";
-document.body.appendChild(zoneName);
-
-const exportBtn = document.createElement("button");
-exportBtn.textContent = "Exporter ZONES";
-exportBtn.style.position = "fixed";
-exportBtn.style.top = "10px";
-exportBtn.style.left = "230px";
-exportBtn.style.zIndex = "99999";
-exportBtn.style.padding = "6px 10px";
-exportBtn.style.fontSize = "14px";
-exportBtn.style.borderRadius = "6px";
-exportBtn.style.background = "#0ff";
-exportBtn.style.color = "#000";
-document.body.appendChild(exportBtn);
-
-imgEl.style.cursor = "crosshair";
-imgEl.addEventListener("click", e => {
-  const rect = imgEl.getBoundingClientRect();
-  const scaleX = rect.width / 1024;
-  const scaleY = rect.height / 1024;
-  const x = Math.round((e.clientX - rect.left) / scaleX);
-  const y = Math.round((e.clientY - rect.top) / scaleY);
-  if (!zoneName.value) {
-    alert("⚠️ Entrez un nom de zone avant de cliquer !");
-    return;
-  }
-  clickedPoints.push({ name: zoneName.value, x, y });
-  console.log(`Point ajouté: ${zoneName.value} → x:${x}, y:${y}`);
-  const dot = document.createElement("div");
-  dot.style.position = "absolute";
-  dot.style.left = e.clientX + "px";
-  dot.style.top = e.clientY + "px";
-  dot.style.width = "10px";
-  dot.style.height = "10px";
-  dot.style.borderRadius = "50%";
-  dot.style.background = "cyan";
-  dot.style.zIndex = "9999";
-  dot.style.pointerEvents = "none";
-  document.body.appendChild(dot);
-});
-
-exportBtn.addEventListener("click", () => {
-  let out = "const ZONES = [\n";
-  clickedPoints.forEach(p => {
-    out += `  { name: "${p.name}", x: ${p.x}, y: ${p.y} },\n`;
-  });
-  out += "];";
-  console.log(out);
-  navigator.clipboard.writeText(out);
-  alert("✅ Coordonnées copiées dans le presse-papiers !");
-});
-</script>
-
-  
+  <!-- === Script principal === -->
   <script src="script.js"></script>
+
 </body>
 </html>
