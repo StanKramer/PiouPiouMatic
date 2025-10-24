@@ -177,3 +177,8 @@ window.addEventListener("DOMContentLoaded", () => {
   positionHotspots();
   console.log("✅ Hotspots initialisés :", document.querySelectorAll(".hotspot").length);
 });
+window.addEventListener("DOMContentLoaded", () => {
+  refreshHotspots();
+  positionHotspots();
+  console.log("✅ Hotspots affichés :", document.querySelectorAll(".hotspot").length);
+});
