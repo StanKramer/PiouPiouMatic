@@ -170,3 +170,10 @@ function calculateBilling(list, opts){
 
   return { total: Math.round(total), details, recapHTML: recapActs + signature };
 }
+
+// Assure l'affichage immédiat des hotspots
+window.addEventListener("DOMContentLoaded", () => {
+  refreshHotspots();
+  positionHotspots();
+  console.log("✅ Hotspots initialisés :", document.querySelectorAll(".hotspot").length);
+});
