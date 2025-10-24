@@ -1,32 +1,29 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PiouPiouMatic RP</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PiouPiouMatic - Ocean Medical Center</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- === Bandeau supérieur avec logo === -->
+  <!-- === En-tête === -->
   <header class="header">
     <div class="logo">
-      <img src="logo_pioupioumatic.png" alt="Logo PiouPiouMatic" />
+      <img src="logo_pioupioumatic.png" alt="Logo PiouPiouMatic">
     </div>
     <h1>PiouPiouMatic</h1>
   </header>
 
-  <!-- === Conteneur principal === -->
+  <!-- === Interface principale === -->
   <main class="container">
-
-    <!-- === Image corps humain + hotspots === -->
     <section class="body-section">
       <div id="body-map">
-        <img id="body-image" src="body_both.png" alt="Corps humain" />
+        <img id="body-image" src="body_both.png" alt="Corps humain">
       </div>
     </section>
 
-    <!-- === Panneau résumé / diagnostic === -->
     <aside id="injury-panel">
       <h2>🩺 Résumé médical</h2>
       <div id="injury-list">
@@ -37,27 +34,32 @@
         <button id="reset-btn">🔄 Réinitialiser</button>
       </div>
     </aside>
-
   </main>
 
-  <!-- === Fenêtre modale pour diagnostic === -->
+  <!-- === Fenêtre de diagnostic === -->
   <div id="injury-modal" class="modal hidden">
     <div class="modal-content">
       <h3 id="zone-title">Blessure — </h3>
+
       <label for="injury-type">Type de blessure :</label>
       <select id="injury-type">
-        <option value="contondante">Contondante</option>
-        <option value="arme blanche">Arme blanche</option>
         <option value="arme feu">Arme à feu</option>
+        <option value="arme blanche">Arme blanche</option>
         <option value="fracture">Fracture</option>
         <option value="luxation">Luxation</option>
         <option value="brulure">Brûlure</option>
         <option value="chute">Chute</option>
+        <option value="morsure">Morsure</option>
         <option value="entorse">Entorse</option>
+        <option value="perforation">Perforation</option>
+        <option value="ecrasement">Écrasement</option>
+        <option value="avp">Accident de véhicule</option>
+        <option value="contondante">Contondante</option>
+        <option value="contusion">Contusion</option>
       </select>
 
       <label for="pain-level">Niveau de douleur :</label>
-      <input type="range" id="pain-level" min="1" max="10" value="5" />
+      <input type="range" id="pain-level" min="1" max="10" value="5">
       <span id="pain-value">5</span>/10
 
       <div class="diagnostic-text">
@@ -77,6 +79,5 @@
 
   <!-- === Script principal === -->
   <script src="script.js"></script>
-
 </body>
 </html>
