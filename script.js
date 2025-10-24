@@ -30,6 +30,45 @@ const resetBtn = document.getElementById("reset-btn");
 const IMG_WIDTH = 1024;
 const IMG_HEIGHT = 1024;
 
+/* ================================================================
+   Création et affichage des hotspots
+================================================================ */
+function createHotspot(zone) {
+  const s = document.createElement("div");
+  s.className = "hotspot";
+  s.dataset.id = zone.id;
+  s.dataset.x = zone.x;
+  s.dataset.y = zone.y;
+  s.title = zone.name;
+  s.addEventListener("click", () => openModal(zone));
+  bodyMap.appendChild(s);
+}
+
+function refreshHotspots() {
+  document.querySelectorAll(".hotspot").forEach(h => h.remove());
+  ZONES.forEach(z => createHotspot(z));
+  positionHotspots();
+}
+
+function positionHotspots() {
+  const rect = imgEl.getBoundingClientRect();
+  const scaleX = rect.width / IMG_WIDTH;
+  const scaleY = rect.height / IMG_HEIGHT;
+  const mapRect = bodyMap.getBoundingClientRect();
+
+  document.querySelectorAll(".hotspot").forEach(s => {
+    const px = parseFloat(s.dataset.x);
+    const py = parseFloat(s.dataset.y);
+    const left = rect.left + px * scaleX - mapRect.left;
+    const top  = rect.top  + py * scaleY - mapRect.top;
+    s.style.left = left + "px";
+    s.style.top  = top  + "px";
+  });
+}
+
+window.addEventListener("resize", positionHotspots);
+
+
 /* ---------- Coordonnées hotspots ---------- */
 let ZONES = [
   { id: "head", x: 256, y: 80, name: "Tête", tags: ["head","front"] },
