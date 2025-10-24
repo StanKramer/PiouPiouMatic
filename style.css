@@ -1,3 +1,55 @@
+/* ===============================================================
+   PiouPiouMatic RP - Interface Médicale
+   Thème hospitalier sombre + calibration RP
+================================================================= */
+
+body {
+  margin: 0;
+  background: #0b0f14;
+  color: #e6edf3;
+  font-family: "Segoe UI", Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/* ---------- Bandeau supérieur ---------- */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: linear-gradient(180deg, rgba(20,25,33,0.95) 0%, rgba(10,15,20,0.85) 100%);
+  border-bottom: 1px solid rgba(80,120,180,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 15px;
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+}
+.logo {
+  height: 42px;
+  width: auto;
+  filter: drop-shadow(0 0 10px rgba(144,194,255,0.5));
+  margin-right: 15px;
+}
+.system-status {
+  color: #9dd1ff;
+  font-size: 1rem;
+  text-shadow: 0 0 8px rgba(80,180,255,0.6);
+}
+
+/* ---------- Zone principale ---------- */
+main {
+  display: flex;
+  gap: 1rem;
+  width: 92%;
+  max-width: 1400px;
+  margin-top: 80px;
+}
 #body-map {
   position: relative;
   flex: 2;
@@ -6,16 +58,67 @@
   align-items: center;
   overflow: hidden;
 }
-
 #body-image {
   height: 100vh;
   width: auto;
   max-width: 100%;
   object-fit: contain;
-  display: block;
   border-radius: 8px;
+  display: block;
 }
 
+/* ---------- Panneau des blessures ---------- */
+#injury-panel {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 1rem;
+  overflow-y: auto;
+  max-height: 85vh;
+  backdrop-filter: blur(4px);
+}
+#injury-panel h2 {
+  margin-top: 0;
+  color: #9dd1ff;
+}
+.injury-group h3 {
+  margin-bottom: 0.3rem;
+  color: #90c2ff;
+}
+.injury-item {
+  font-size: 0.9rem;
+  padding: 0.3rem 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ---------- Boutons ---------- */
+button {
+  padding: 0.55rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #1b2330;
+  color: #e6edf3;
+  transition: background 0.2s, border 0.2s, transform 0.2s;
+}
+button:hover { transform: scale(1.03); }
+button.primary { background: #2d6df6; color: #fff; }
+button.secondary {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #9dd1ff;
+}
+button.secondary:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.3);
+}
+#reset-btn, #recalibrate-btn {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+/* ---------- Hotspots ---------- */
 .hotspot {
   position: absolute;
   width: 28px;
@@ -24,11 +127,64 @@
   background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.3);
   cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
   transform: translate(-50%, -50%);
+  transition: background 0.2s, transform 0.2s;
 }
-.hotspot:hover { background: rgba(255,255,255,0.3); transform: translate(-50%, -50%) scale(1.1); }
+.hotspot:hover {
+  background: rgba(255,255,255,0.3);
+  transform: translate(-50%, -50%) scale(1.1);
+}
 
+/* ---------- Modale ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.hidden { display: none !important; }
+.modal-content {
+  background: #121821;
+  padding: 1.2rem 1.4rem;
+  border-radius: 12px;
+  width: 420px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.modal-content h3 { color: #9dd1ff; }
+.buttons { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
+
+/* ---------- Calibration Overlay ---------- */
+.calib-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  color: #fff;
+}
+.calib-card {
+  background: #121821;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(0,255,255,0.2);
+  animation: pulseCalib 1.8s infinite;
+}
+@keyframes pulseCalib {
+  0%,100% { box-shadow: 0 0 20px rgba(0,255,255,0.2); }
+  50% { box-shadow: 0 0 30px rgba(0,255,255,0.5); }
+}
+.calib-card h3 { color: #00ffff; margin-top: 0; }
+.calib-actions { margin-top: 1rem; }
+
+/* ---------- Labels calibration/test ---------- */
 .test-label, .calib-label {
   position: absolute;
   color: #00ffff;
@@ -41,3 +197,23 @@
   padding: 1px 4px;
   z-index: 10;
 }
+
+/* ---------- Bouton son ---------- */
+.sound-btn {
+  position: fixed;
+  top: 10px;
+  right: 15px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 50%;
+  font-size: 1.4rem;
+  color: #90c2ff;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+}
+.sound-btn:hover { background: rgba(255,255,255,0.15); }
