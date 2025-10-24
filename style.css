@@ -156,6 +156,7 @@ button.secondary:hover {
 .buttons { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
 
 /* ---------- Popup Calibration ---------- */
+/* ---------- Popup Calibration (clics transparents) ---------- */
 .calib-overlay {
   position: fixed;
   inset: 0;
@@ -166,7 +167,9 @@ button.secondary:hover {
   justify-content: center;
   z-index: 10000;
   color: #fff;
+  pointer-events: none; /* ✅ permet de cliquer à travers sur le corps */
 }
+
 .calib-card {
   background: #121821;
   border: 1px solid rgba(255,255,255,0.1);
@@ -175,7 +178,9 @@ button.secondary:hover {
   text-align: center;
   box-shadow: 0 0 20px rgba(0,255,255,0.3);
   animation: pulseCalib 1.8s infinite;
+  pointer-events: all; /* ✅ bouton Ignorer reste cliquable */
 }
+
 @keyframes pulseCalib {
   0%,100% { box-shadow: 0 0 20px rgba(0,255,255,0.2); }
   50% { box-shadow: 0 0 35px rgba(0,255,255,0.6); }
