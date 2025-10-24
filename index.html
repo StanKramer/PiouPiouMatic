@@ -1,79 +1,62 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>PiouPiouMatic v3 — Face & Dos</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PiouPiouMatic — Diagnostic RP</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<div class="app">
-  <header class="app-header">
-    <h1>PiouPiouMatic v3 — Face & Dos</h1>
-    <div class="muted">Fond noir • Texte blanc • Une modal • Zones précises</div>
-  </header>
+  <h1 class="title">🩺 PiouPiouMatic — Interface de diagnostic RP</h1>
 
-  <main class="layout">
-    <section id="imageContainer" class="panel image-panel">
-      <img id="bodyImg" src="assets/body_both.png" alt="Corps face et dos" class="body-image" />
-      <div id="hotspotLayer" class="hotspot-layer" aria-hidden="true"></div>
-      <div class="hint">Face = gauche • Dos = droite • Survolez pour voir la zone</div>
+  <main>
+    <section id="body-map">
+      <img src="assets/body_both.png" alt="Corps humain face et dos" id="body-image" />
     </section>
 
-    <aside class="panel info-panel">
-      <h2>Blessures, symptômes & traitements</h2>
-      <div id="injuryList" class="injury-list">
-        <p class="muted">Aucune blessure pour le moment. Clique sur une zone.</p>
-      </div>
-      <div class="bottom-row">
-        <div class="muted">Douleur &gt; 5 → atteinte organes/muscles possible</div>
-        <button id="resetBtn" class="btn btn-danger">Réinitialiser</button>
+    <aside id="injury-panel">
+      <h2>Blessures enregistrées</h2>
+      <div id="injury-list" class="injury-list">
+        <p>Aucune blessure détectée</p>
       </div>
     </aside>
   </main>
 
-  <!-- Modal -->
-  <div id="modal" class="modal hidden" role="dialog" aria-hidden="true">
-    <div class="modal-backdrop"></div>
-    <div class="modal-box" role="document">
-      <h3 id="modalTitle">Ajouter une blessure</h3>
-      <div id="modalPart" class="muted">Partie: --</div>
+  <!-- Modal de blessure -->
+  <div id="injury-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content">
+      <h3 id="zone-title">Nouvelle blessure</h3>
 
-      <label class="muted">Vue</label>
-      <select id="modalView" class="input">
-        <option value="face">Face</option>
-        <option value="dos">Dos</option>
-      </select>
-
-      <label class="muted">Type de blessure</label>
-      <select id="modalType" class="input">
-        <option value="contendante">Contondante</option>
+      <label>Type de blessure :</label>
+      <select id="injury-type">
         <option value="arme feu">Arme à feu</option>
         <option value="arme blanche">Arme blanche</option>
-        <option value="avp">Accident véhicule</option>
+        <option value="contendante">Contondante</option>
+        <option value="avp">Accident de véhicule</option>
         <option value="chute">Chute</option>
       </select>
 
-      <label class="muted">Douleur (1–10)</label>
-      <input id="modalPain" type="range" min="1" max="10" value="5" class="range" />
-      <div class="muted">Valeur: <span id="modalPainLabel">5</span>/10</div>
+      <label>Douleur (1–10) :</label>
+      <input type="range" id="pain-level" min="1" max="10" value="5" />
+      <span id="pain-value">5</span>
 
-      <label class="muted">Symptômes suggérés</label>
-      <div id="modalSymptoms" class="muted">—</div>
+      <div class="symptoms">
+        <strong>Symptômes :</strong>
+        <p id="symptom-text">—</p>
+      </div>
 
-      <label class="muted">Traitements recommandés</label>
-      <div id="modalTreatments" class="muted">—</div>
+      <div class="treatment">
+        <strong>Traitement :</strong>
+        <p id="treatment-text">—</p>
+      </div>
 
-      <div class="modal-actions">
-        <button id="modalCancel" class="btn">Annuler</button>
-        <button id="modalAdd" class="btn btn-primary">Ajouter</button>
+      <div class="buttons">
+        <button id="close-modal">Annuler</button>
+        <button id="save-injury" class="primary">Ajouter</button>
       </div>
     </div>
   </div>
 
-  <footer class="app-footer muted">PiouPiouMatic v3 — pour RP, non-médical</footer>
-</div>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
