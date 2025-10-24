@@ -1,240 +1,150 @@
-// ===========================
-// PiouPiouMatic Diagnostic UI - Version modal au clic
-// ===========================
-
-// RÉFÉRENCES DOM
-const bodyMap = document.getElementById("hotspotLayer");
-const modal = document.getElementById("modal");
-const modalPart = document.getElementById("modalPart");
-const modalCancel = document.getElementById("modalCancel");
-const modalAdd = document.getElementById("modalAdd");
-const modalType = document.getElementById("modalType");
-const modalPain = document.getElementById("modalPain");
-const modalPainLabel = document.getElementById("modalPainLabel");
-const modalSymptoms = document.getElementById("modalSymptoms");
-const modalTreatments = document.getElementById("modalTreatments");
-const injuryList = document.getElementById("injuryList");
+const bodyMap = document.getElementById("body-map");
+const modal = document.getElementById("injury-modal");
+const injuryType = document.getElementById("injury-type");
+const painLevel = document.getElementById("pain-level");
+const painValue = document.getElementById("pain-value");
+const symptomText = document.getElementById("symptom-text");
+const treatmentText = document.getElementById("treatment-text");
+const saveBtn = document.getElementById("save-injury");
+const closeBtn = document.getElementById("close-modal");
+const injuryList = document.getElementById("injury-list");
 
 let injuries = [];
 let currentZone = null;
+let groinClicks = 0;
 
-// --- Correction ouverture auto du modal ---
-document.addEventListener("DOMContentLoaded", () => {
-  if (modal) {
-    modal.classList.add("hidden"); // forcer masquage
-    modal.classList.remove("flex"); // éviter affichage forcé
-    modal.style.display = "none"; // sécurité supplémentaire
-  }
-  currentHotspot = null; // ou currentZone selon ton code
+// ——— Empêche le modal d'apparaître au démarrage ———
+window.addEventListener("DOMContentLoaded", () => {
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden", "true");
 });
 
-
-
-// ===========================
-// DÉFINITION DES ZONES
-// ===========================
+// ——— Définition des zones cliquables ———
 const zones = [
-  { id: "head", name: "Tête / Mâchoire", x: "49%", y: "12%" },
-  { id: "chest", name: "Torse", x: "49%", y: "30%" },
-  { id: "abdomen", name: "Abdomen", x: "49%", y: "45%" },
-  { id: "left-arm", name: "Bras gauche / Avant-bras", x: "38%", y: "30%" },
-  { id: "right-arm", name: "Bras droit / Avant-bras", x: "60%", y: "30%" },
-  { id: "left-hand", name: "Main gauche / Doigts", x: "34%", y: "45%" },
-  { id: "right-hand", name: "Main droite / Doigts", x: "64%", y: "45%" },
-  { id: "left-thigh", name: "Cuisse gauche", x: "45%", y: "60%" },
-  { id: "right-thigh", name: "Cuisse droite", x: "53%", y: "60%" },
-  { id: "left-leg", name: "Jambe gauche / Tibia", x: "46%", y: "75%" },
-  { id: "right-leg", name: "Jambe droite / Tibia", x: "52%", y: "75%" },
-  { id: "groin", name: "Entre-jambe", x: "49%", y: "54%" },
+  { id: "head", x: "47%", y: "12%", name: "Tête" },
+  { id: "chest", x: "47%", y: "32%", name: "Torse" },
+  { id: "abdomen", x: "47%", y: "45%", name: "Abdomen" },
+  { id: "left-arm", x: "35%", y: "35%", name: "Bras gauche" },
+  { id: "right-arm", x: "60%", y: "35%", name: "Bras droit" },
+  { id: "left-leg", x: "44%", y: "70%", name: "Jambe gauche" },
+  { id: "right-leg", x: "52%", y: "70%", name: "Jambe droite" },
+  { id: "groin", x: "48%", y: "55%", name: "Entre-jambe" },
 ];
 
-// ===========================
-// AJOUT DYNAMIQUE DES HOTSPOTS
-// ===========================
+// Création des hotspots
 zones.forEach((zone) => {
   const spot = document.createElement("div");
-  spot.classList.add("hotspot");
+  spot.className = "hotspot";
   spot.style.left = zone.x;
   spot.style.top = zone.y;
-  spot.dataset.zone = zone.id;
   spot.title = zone.name;
 
-  // clic sur zone → ouvre le modal
   spot.addEventListener("click", () => {
-    currentZone = zone;
-    modalPart.textContent = "Partie: " + zone.name;
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-    updateModalFields();
+    if (zone.id === "groin") {
+      groinClicks++;
+      if (groinClicks === 10) {
+        alert("On peut apprendre à se connaître avant non ? Moi c’est Stan, on va au chalet ?");
+        groinClicks = 0;
+        return;
+      }
+    }
+    openModal(zone);
   });
 
   bodyMap.appendChild(spot);
 });
 
-// ===========================
-// INITIALISATION DU MODAL
-// ===========================
-function updateModalFields() {
-  modalPain.value = 5;
-  modalPainLabel.textContent = "5";
-  modalType.innerHTML = `
-    <option value="arme feu">Arme à feu</option>
-    <option value="arme blanche">Arme blanche</option>
-    <option value="contendante">Contondante</option>
-    <option value="avp">Accident véhicule</option>
-    <option value="chute">Chute</option>
-  `;
-  modalSymptoms.textContent = "—";
-  modalTreatments.textContent = "—";
+// ——— Gestion du modal ———
+function openModal(zone) {
+  currentZone = zone;
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+  document.getElementById("zone-title").textContent = `Blessure — ${zone.name}`;
 }
 
-// Mise à jour de l'affichage de la douleur
-modalPain.addEventListener("input", () => {
-  modalPainLabel.textContent = modalPain.value;
-});
-
-// ===========================
-// FERMETURE DU MODAL
-// ===========================
-modalCancel.addEventListener("click", () => {
+function closeModal() {
   modal.classList.add("hidden");
-  modal.classList.remove("flex");
+  modal.setAttribute("aria-hidden", "true");
   currentZone = null;
+}
+
+closeBtn.addEventListener("click", closeModal);
+
+// ——— Gestion douleur ———
+painLevel.addEventListener("input", () => {
+  painValue.textContent = painLevel.value;
+  updateDiagnosis();
 });
 
-// ===========================
-// AJOUT DE BLESSURE
-// ===========================
-modalAdd.addEventListener("click", () => {
-  if (!currentZone) return;
+// ——— Génération des symptômes et traitements ———
+function updateDiagnosis() {
+  const type = injuryType.value;
+  const pain = parseInt(painLevel.value);
+  let symptoms = [];
+  let treatments = [];
 
-  const type = modalType.value;
-  const pain = parseInt(modalPain.value);
-  const symptoms = generateSymptoms(type, pain);
-  const treatment = generateTreatment(type, pain);
-
-  injuries.push({
-    zone: currentZone.name,
-    type,
-    pain,
-    symptoms,
-    treatment,
-  });
-
-  updateInjuryList();
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
-  currentZone = null;
-});
-
-// ===========================
-// GÉNÉRATION AUTOMATIQUE
-// ===========================
-function generateSymptoms(type, pain) {
-  let base = [];
   switch (type) {
     case "arme feu":
-      base = ["Plaie perforante", "Saignement"];
-      if (pain >= 5) base.push("Possible organe touché");
+      symptoms = ["Plaie perforante", "Saignement abondant"];
+      if (pain >= 5) symptoms.push("Organe ou muscle touché");
+      treatments = ["Extraction de balle", "Suture", "Antibiotiques"];
       break;
     case "arme blanche":
-      base = ["Entaille", "Saignement modéré"];
-      if (pain >= 5) base.push("Lésion musculaire probable");
+      symptoms = ["Entaille profonde", "Saignement modéré"];
+      if (pain >= 6) symptoms.push("Lésion musculaire");
+      treatments = ["Suture fine", "Désinfection", "Antalgiques"];
       break;
     case "contendante":
-      base = ["Hématome", "Douleur localisée"];
-      if (pain >= 7) base.push("Fracture suspectée");
+      symptoms = ["Hématome", "Douleur localisée"];
+      if (pain >= 7) symptoms.push("Fracture suspectée");
+      treatments = ["Glace", "Radio", "Immobilisation"];
       break;
     case "avp":
-      base = ["Traumatisme global", "Douleur généralisée"];
-      if (pain >= 6) base.push("Suspicion de lésions internes");
+      symptoms = ["Traumatisme global", "Douleur diffuse"];
+      if (pain >= 7) symptoms.push("Lésions internes probables");
+      treatments = ["Scanner complet", "Surveillance", "Oxygène"];
       break;
     case "chute":
-      base = ["Ecchymoses", "Douleur diffuse"];
-      if (pain >= 8) base.push("Risque de fracture ou luxation");
+      symptoms = ["Ecchymoses", "Douleur diffuse"];
+      if (pain >= 8) symptoms.push("Fracture possible");
+      treatments = ["Radio", "Antalgiques", "Repos"];
       break;
-    default:
-      base = ["Douleur localisée"];
   }
-  return base.join(", ");
-}
 
-function generateTreatment(type, pain) {
-  let treatments = ["Surveillance médicale"];
-  if (pain >= 8) treatments.push("Morphine IV", "Imagerie (IRM, Scanner)");
-  else if (pain >= 5) treatments.push("Antalgiques", "Radio de contrôle");
+  if (pain >= 8) treatments.push("Morphine / IRM");
+  else if (pain >= 5) treatments.push("Antalgiques", "Surveillance");
   else treatments.push("Crème apaisante", "Repos localisé");
 
-  if (type === "arme feu") treatments.push("Extraction de balle", "Suture");
-  if (type === "arme blanche") treatments.push("Désinfection", "Suture fine");
-  if (type === "contendante") treatments.push("Immobilisation", "Bandage");
-  if (type === "avp") treatments.push("Scanner complet", "Mise sous oxygène");
-  if (type === "chute") treatments.push("Radio", "Bilan locomoteur");
-
-  return treatments.join(", ");
+  symptomText.textContent = symptoms.join(", ");
+  treatmentText.textContent = treatments.join(", ");
 }
 
-// ===========================
-// AFFICHAGE DES BLESSURES
-// ===========================
-function updateInjuryList
+injuryType.addEventListener("change", updateDiagnosis);
 
-// ======== Patch ouverture intempestive du modal ========
+// ——— Ajout de la blessure ———
+saveBtn.addEventListener("click", () => {
+  if (!currentZone) return;
 
-// Bloque tout affichage automatique du modal avant clic
-if (modal) {
-  modal.classList.add("hidden");
-  modal.style.display = "none";
-}
-
-// Neutralise tout appel automatique à openModal au démarrage
-window.addEventListener("load", () => {
-  if (typeof currentHotspot !== "undefined") {
-    currentHotspot = null;
-  }
-  if (typeof openModalForHotspot === "function") {
-    const originalOpen = openModalForHotspot;
-    window.openModalForHotspot = function (h) {
-      if (!h || !h.id) return; // uniquement quand l’utilisateur clique
-      return originalOpen(h);
-    };
-  }
+  const injury = {
+    zone: currentZone.name,
+    type: injuryType.value,
+    pain: painLevel.value,
+    symptoms: symptomText.textContent,
+    treatments: treatmentText.textContent,
+  };
+  injuries.push(injury);
+  renderInjuries();
+  closeModal();
 });
 
-// ==========================
-// PATCH anti-ouverture auto
-// ==========================
-
-// 1. Force la fermeture du modal dès le chargement
-window.addEventListener("DOMContentLoaded", () => {
-  if (modal) {
-    modal.classList.add("hidden");
-    modal.style.display = "none";
-    modal.setAttribute("aria-hidden", "true");
-  }
-  if (typeof currentHotspot !== "undefined") currentHotspot = null;
-});
-
-// 2. Bloque toute ouverture sans clic utilisateur
-const _openModalForHotspot = typeof openModalForHotspot === "function" ? openModalForHotspot : null;
-if (_openModalForHotspot) {
-  window.openModalForHotspot = function (h) {
-    // Ne pas ouvrir si aucun vrai clic n’a eu lieu
-    if (!h || !h.id || !h.zone) return;
-    // Sinon comportement normal
-    _openModalForHotspot(h);
-  };
+function renderInjuries() {
+  injuryList.innerHTML = "";
+  injuries.forEach((i) => {
+    const item = document.createElement("div");
+    item.classList.add("injury-item");
+    item.innerHTML = `<strong>${i.zone}</strong> — ${i.type} (Douleur ${i.pain}/10)<br>
+    Symptômes: ${i.symptoms}<br>
+    Traitements: ${i.treatments}<br><hr>`;
+    injuryList.appendChild(item);
+  });
 }
-
-// 3. Supprime tout appel automatique à openModal ou openModalForHotspot
-if (typeof openModal === "function") {
-  const _origOpen = openModal;
-  window.openModal = function (zone) {
-    // Ne rien faire sans interaction manuelle
-    if (!zone || !zone.id) return;
-    _origOpen(zone);
-  };
-}
-
-// 4. (optionnel) log de debug
-console.log("✅ Patch anti-popup automatique actif — modal désactivé tant qu’aucune zone n’est cliquée");
