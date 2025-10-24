@@ -1,6 +1,6 @@
 /* ===============================================================
    PiouPiouMatic RP - Interface Médicale
-   Thème hospitalier sombre + calibration RP
+   Thème hospitalier sombre + Calibration semi-auto
 ================================================================= */
 
 body {
@@ -156,7 +156,6 @@ button.secondary:hover {
 .buttons { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
 
 /* ---------- Popup Calibration ---------- */
-/* ---------- Popup Calibration (clics transparents) ---------- */
 .calib-overlay {
   position: fixed;
   inset: 0;
@@ -167,22 +166,21 @@ button.secondary:hover {
   justify-content: center;
   z-index: 10000;
   color: #fff;
-  pointer-events: none; /* ✅ permet de cliquer à travers sur le corps */
+  pointer-events: none; /* ✅ permet de cliquer sur le corps */
 }
-
 .calib-card {
-  background: #121821;
+  background: rgba(18, 24, 33, 0.95);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 12px;
   padding: 1.5rem 2rem;
   text-align: center;
-  box-shadow: 0 0 20px rgba(0,255,255,0.3);
+  box-shadow: 0 0 25px rgba(0,255,255,0.4);
   animation: pulseCalib 1.8s infinite;
-  pointer-events: all; /* ✅ bouton Ignorer reste cliquable */
+  pointer-events: all; /* ✅ pour le bouton Ignorer */
+  transition: opacity 0.4s ease;
 }
-
 @keyframes pulseCalib {
-  0%,100% { box-shadow: 0 0 20px rgba(0,255,255,0.2); }
+  0%,100% { box-shadow: 0 0 20px rgba(0,255,255,0.25); }
   50% { box-shadow: 0 0 35px rgba(0,255,255,0.6); }
 }
 .calib-card h3 { color: #00ffff; margin-top: 0; }
@@ -209,10 +207,10 @@ button.secondary:hover {
 .calib-flash {
   position: fixed;
   inset: 0;
-  background: rgba(0,255,255,0.2);
+  background: rgba(0,255,255,0.25);
   backdrop-filter: blur(3px);
   z-index: 9998;
-  animation: flashOut 0.4s forwards;
+  animation: flashOut 0.5s forwards;
 }
 @keyframes flashOut {
   from { opacity: 1; }
