@@ -31,6 +31,27 @@ const zones = [
   { id: "groin", x: "48%", y: "55%", name: "Entre-jambe" },
 ];
 
+function resizeHotspots() {
+  const img = document.getElementById("body-image");
+  const mapRect = img.getBoundingClientRect();
+
+  document.querySelectorAll(".hotspot").forEach((spot) => {
+    const zone = zones.find(z => z.name === spot.title);
+    if (!zone) return;
+
+    // positionnement dynamique
+    const x = parseFloat(zone.x);
+    const y = parseFloat(zone.y);
+
+    spot.style.left = `${(x / 100) * mapRect.width}px`;
+    spot.style.top = `${(y / 100) * mapRect.height}px`;
+  });
+}
+
+window.addEventListener("resize", resizeHotspots);
+window.addEventListener("load", resizeHotspots);
+
+
 // Création des hotspots
 zones.forEach((zone) => {
   const spot = document.createElement("div");
@@ -148,3 +169,6 @@ function renderInjuries() {
     injuryList.appendChild(item);
   });
 }
+
+// Initialisation après chargement
+window.addEventListener("DOMContentLoaded", resizeHotspots);
