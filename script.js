@@ -18,14 +18,16 @@ const injuryList = document.getElementById("injuryList");
 let injuries = [];
 let currentZone = null;
 
-// Empêche le modal de s'afficher au chargement
+// --- Correction ouverture auto du modal ---
 document.addEventListener("DOMContentLoaded", () => {
   if (modal) {
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
+    modal.classList.add("hidden"); // forcer masquage
+    modal.classList.remove("flex"); // éviter affichage forcé
+    modal.style.display = "none"; // sécurité supplémentaire
   }
-  currentZone = null;
+  currentHotspot = null; // ou currentZone selon ton code
 });
+
 
 
 // ===========================
