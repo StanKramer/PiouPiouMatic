@@ -1,30 +1,96 @@
-/* PiouPiouMatic style.css */
-:root{--bg:#000;--panel:rgba(255,255,255,0.03);--muted:#bdbdbd;--accent:#4f46e5}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-.app{max-width:1200px;margin:0 auto;padding:18px}
-.app-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.app-header h1{font-size:20px;margin:0}
-.muted{color:var(--muted)}
-.layout{display:grid;grid-template-columns:1fr 420px;gap:16px}
-.panel{background:var(--panel);border:1px solid rgba(255,255,255,0.04);padding:12px;border-radius:10px}
-.image-panel{position:relative;padding:10px}
-.body-image{display:block;max-width:1000px;width:100%;height:auto;image-rendering:optimizeQuality}
-.hotspot-layer{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
-.hotspot{position:absolute;border-radius:8px;pointer-events:auto}
-.hotspot:hover{outline:2px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02)}
-.hint{text-align:center;margin-top:8px;color:var(--muted);font-size:13px}
-.info-panel h2{margin:0 0 8px 0}
-.injury-list{max-height:60vh;overflow:auto}
-.bottom-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
-.btn{background:#222;border:1px solid rgba(255,255,255,0.06);color:#fff;padding:8px 10px;border-radius:8px;cursor:pointer}
-.btn-primary{background:var(--accent)}
-.btn-danger{background:#b91c1c}
-.input{background:#0b0b0b;border:1px solid rgba(255,255,255,0.06);color:#fff;padding:8px;border-radius:6px;width:100%}
-.range{width:100%}
-.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:60}
-.modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.7)}
-.modal-box{position:relative;z-index:61;background:#111;padding:16px;border-radius:10px;max-width:420px;width:94%}
-.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
-.app-footer{text-align:center;margin-top:14px;color:var(--muted);font-size:13px}
-@media(max-width:1000px){.layout{grid-template-columns:1fr}}
+body {
+  margin: 0;
+  background: #000;
+  color: white;
+  font-family: "Segoe UI", Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  margin: 1rem 0;
+}
+
+main {
+  display: flex;
+  gap: 1rem;
+  width: 90%;
+  max-width: 1400px;
+}
+
+#body-map {
+  position: relative;
+  flex: 2;
+}
+
+#body-image {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.hotspot {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.hotspot:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+#injury-panel {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-y: auto;
+  max-height: 85vh;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.modal-content {
+  background: #111;
+  padding: 1.5rem;
+  border-radius: 10px;
+  width: 400px;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button.primary {
+  background: #2563eb;
+  color: white;
+}
+
+.symptoms, .treatment {
+  margin-top: 0.8rem;
+  font-size: 0.9rem;
+}
+
+.buttons {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
