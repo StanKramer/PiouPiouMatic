@@ -178,3 +178,25 @@ function generateTreatment(type, pain) {
 // AFFICHAGE DES BLESSURES
 // ===========================
 function updateInjuryList
+
+// ======== Patch ouverture intempestive du modal ========
+
+// Bloque tout affichage automatique du modal avant clic
+if (modal) {
+  modal.classList.add("hidden");
+  modal.style.display = "none";
+}
+
+// Neutralise tout appel automatique à openModal au démarrage
+window.addEventListener("load", () => {
+  if (typeof currentHotspot !== "undefined") {
+    currentHotspot = null;
+  }
+  if (typeof openModalForHotspot === "function") {
+    const originalOpen = openModalForHotspot;
+    window.openModalForHotspot = function (h) {
+      if (!h || !h.id) return; // uniquement quand l’utilisateur clique
+      return originalOpen(h);
+    };
+  }
+});
