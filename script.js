@@ -27,28 +27,45 @@ const IMG_HEIGHT = 1024;
 
 /* ---------- Données anatomiques (pixels) ---------- */
 const ZONES = [
-  { id: "head", x: 256, y: 80, name: "Tête", tags: ["head"] },
-  { id: "neck", x: 256, y: 160, name: "Cou", tags: ["neck"] },
-  { id: "shoulderL", x: 210, y: 200, name: "Épaule gauche", tags: ["shoulder"] },
-  { id: "shoulderR", x: 302, y: 200, name: "Épaule droite", tags: ["shoulder"] },
-  { id: "chest", x: 256, y: 260, name: "Thorax", tags: ["thorax"] },
-  { id: "abdomen", x: 256, y: 370, name: "Abdomen", tags: ["abdomen"] },
-  { id: "groin", x: 256, y: 450, name: "Entrejambe", tags: ["groin"] },
-  { id: "kneeL", x: 240, y: 600, name: "Genou gauche", tags: ["knee"] },
-  { id: "kneeR", x: 272, y: 600, name: "Genou droit", tags: ["knee"] },
-  { id: "footL", x: 240, y: 870, name: "Pied gauche", tags: ["foot"] },
-  { id: "footR", x: 272, y: 870, name: "Pied droit", tags: ["foot"] },
+  // --- Vue de face (gauche de l'image, x≈0–512) ---
+  { id: "head", x: 256, y: 80, name: "Tête", tags: ["head","front"] },
+  { id: "face", x: 256, y: 140, name: "Visage", tags: ["head","front"] },
+  { id: "neck", x: 256, y: 190, name: "Cou", tags: ["neck","front"] },
+  { id: "shoulderL", x: 200, y: 210, name: "Épaule gauche", tags: ["shoulder","front"] },
+  { id: "shoulderR", x: 310, y: 210, name: "Épaule droite", tags: ["shoulder","front"] },
+  { id: "chest", x: 256, y: 270, name: "Poitrine", tags: ["thorax","front"] },
+  { id: "armL", x: 180, y: 320, name: "Bras gauche", tags: ["arm","front"] },
+  { id: "armR", x: 332, y: 320, name: "Bras droit", tags: ["arm","front"] },
+  { id: "forearmL", x: 170, y: 420, name: "Avant-bras gauche", tags: ["arm","front"] },
+  { id: "forearmR", x: 342, y: 420, name: "Avant-bras droit", tags: ["arm","front"] },
+  { id: "abdomen", x: 256, y: 400, name: "Abdomen", tags: ["abdomen","front"] },
+  { id: "groin", x: 256, y: 470, name: "Entrejambe", tags: ["groin","front"] },
+  { id: "thighL", x: 235, y: 540, name: "Cuisse gauche", tags: ["thigh","front"] },
+  { id: "thighR", x: 277, y: 540, name: "Cuisse droite", tags: ["thigh","front"] },
+  { id: "kneeL", x: 235, y: 650, name: "Genou gauche", tags: ["knee","front"] },
+  { id: "kneeR", x: 277, y: 650, name: "Genou droit", tags: ["knee","front"] },
+  { id: "shinL", x: 235, y: 760, name: "Tibia gauche", tags: ["leg","front"] },
+  { id: "shinR", x: 277, y: 760, name: "Tibia droit", tags: ["leg","front"] },
+  { id: "footL", x: 235, y: 880, name: "Pied gauche", tags: ["foot","front"] },
+  { id: "footR", x: 277, y: 880, name: "Pied droit", tags: ["foot","front"] },
 
-  // Dos
-  { id: "head-back", x: 768, y: 80, name: "Crâne (dos)", tags: ["head", "back"] },
-  { id: "nape", x: 768, y: 160, name: "Nuque", tags: ["neck", "back"] },
-  { id: "upper-back", x: 768, y: 280, name: "Dos haut", tags: ["back"] },
-  { id: "lower-back", x: 768, y: 400, name: "Dos bas", tags: ["back"] },
-  { id: "buttocks", x: 768, y: 480, name: "Fessier", tags: ["hip", "back"] },
-  { id: "hamstringL", x: 740, y: 600, name: "Ischio gauche", tags: ["thigh", "back"] },
-  { id: "hamstringR", x: 796, y: 600, name: "Ischio droit", tags: ["thigh", "back"] },
-  { id: "calfL", x: 740, y: 780, name: "Mollet gauche", tags: ["leg", "back"] },
-  { id: "calfR", x: 796, y: 780, name: "Mollet droit", tags: ["leg", "back"] }
+  // --- Vue de dos (droite de l'image, x≈512–1024) ---
+  { id: "headBack", x: 768, y: 80, name: "Crâne (dos)", tags: ["head","back"] },
+  { id: "nape", x: 768, y: 150, name: "Nuque", tags: ["neck","back"] },
+  { id: "shoulderBackL", x: 715, y: 210, name: "Épaule gauche (dos)", tags: ["shoulder","back"] },
+  { id: "shoulderBackR", x: 821, y: 210, name: "Épaule droite (dos)", tags: ["shoulder","back"] },
+  { id: "upperBack", x: 768, y: 270, name: "Haut du dos", tags: ["back"] },
+  { id: "midBack", x: 768, y: 340, name: "Milieu du dos", tags: ["back"] },
+  { id: "lowerBack", x: 768, y: 420, name: "Bas du dos", tags: ["back"] },
+  { id: "buttocks", x: 768, y: 490, name: "Fessier", tags: ["hip","back"] },
+  { id: "hamstringL", x: 745, y: 580, name: "Arrière cuisse gauche", tags: ["thigh","back"] },
+  { id: "hamstringR", x: 791, y: 580, name: "Arrière cuisse droite", tags: ["thigh","back"] },
+  { id: "kneeBackL", x: 745, y: 660, name: "Creux du genou gauche", tags: ["knee","back"] },
+  { id: "kneeBackR", x: 791, y: 660, name: "Creux du genou droit", tags: ["knee","back"] },
+  { id: "calfL", x: 745, y: 760, name: "Mollet gauche", tags: ["leg","back"] },
+  { id: "calfR", x: 791, y: 760, name: "Mollet droit", tags: ["leg","back"] },
+  { id: "heelL", x: 745, y: 880, name: "Talon gauche", tags: ["foot","back"] },
+  { id: "heelR", x: 791, y: 880, name: "Talon droit", tags: ["foot","back"] }
 ];
 
 /* ================================================================
