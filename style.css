@@ -1,126 +1,252 @@
-/* ===============================================================
-   PiouPiouMatic RP - Interface Médicale
-   Thème hospitalier sombre + Calibration semi-auto
-================================================================= */
+/* ================================================================
+   PiouPiouMatic RP — Style général
+   Thème : sombre / médical / interface moderne
+================================================================ */
 
+/* --- Police & couleurs globales --- */
 body {
   margin: 0;
-  background: #0b0f14;
-  color: #e6edf3;
-  font-family: "Segoe UI", Arial, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  background-color: #0e1116;
+  color: #e8f1f8;
   overflow-x: hidden;
 }
 
-/* Bandeau */
+/* --- En-tête / logo --- */
 .header {
-  position: fixed; top: 0; left: 0; width: 100%; height: 60px;
-  background: linear-gradient(180deg, rgba(20,25,33,0.95), rgba(10,15,20,0.85));
-  border-bottom: 1px solid rgba(80,120,180,0.2);
-  display: flex; align-items: center; padding: 0 15px;
-  backdrop-filter: blur(6px); z-index: 9999;
+  display: flex;
+  align-items: center;
+  background: #12161d;
+  padding: 10px 20px;
+  border-bottom: 1px solid rgba(0,255,255,0.2);
+  box-shadow: 0 0 10px rgba(0,255,255,0.1);
 }
-.logo { height: 42px; width: auto; filter: drop-shadow(0 0 8px rgba(144,194,255,0.5)); margin-right: 15px; }
-.system-status { color: #9dd1ff; font-size: 1rem; text-shadow: 0 0 8px rgba(80,180,255,0.6); }
-
-/* Zone principale */
-main { display: flex; gap: 1rem; width: 92%; max-width: 1400px; margin-top: 80px; }
-#body-map { position: relative; flex: 2; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-#body-image { height: 100vh; width: auto; max-width: 100%; object-fit: contain; border-radius: 8px; display: block; }
-
-/* Panneau */
-#injury-panel {
-  flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px; padding: 1rem; overflow-y: auto; max-height: 85vh; backdrop-filter: blur(4px);
+.header .logo {
+  width: 60px;
+  height: 60px;
+  margin-right: 15px;
+  cursor: pointer;
 }
-#injury-panel h2 { margin-top: 0; color: #9dd1ff; }
-.injury-group h3 { margin-bottom: 0.3rem; color: #90c2ff; }
-.injury-item { font-size: 0.9rem; padding: 0.3rem 0; border-top: 1px solid rgba(255,255,255,0.08); }
+.header .logo img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0,255,255,0.4);
+  transition: transform 0.3s ease;
+}
+.header .logo img:hover {
+  transform: scale(1.1);
+}
+.header h1 {
+  font-size: 1.6rem;
+  color: #0ff;
+  text-shadow: 0 0 6px rgba(0,255,255,0.4);
+  margin: 0;
+}
 
-/* Résumé panneau */
-.panel-summary { font-size: 0.9rem; color: #9dd1ff; }
-.panel-summary hr { border-color: rgba(255,255,255,0.1); }
-#align-status { font-weight: 600; color: #fff; }
+/* --- Disposition générale --- */
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 20px;
+}
+.body-section {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#body-map {
+  position: relative;
+  display: inline-block;
+}
+#body-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+  box-shadow: 0 0 25px rgba(255, 120, 0, 0.3);
+}
 
-/* Boutons */
-button { padding: 0.55rem 1rem; border: none; border-radius: 8px; cursor: pointer; background: #1b2330; color: #e6edf3; transition: background 0.2s, transform 0.2s; }
-button:hover { transform: scale(1.03); }
-button.primary { background: #2d6df6; color: #fff; }
-button.secondary { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #9dd1ff; }
-button.secondary:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.3); }
-#reset-btn, #recalibrate-btn { width: 100%; margin-bottom: 0.5rem; }
-
-/* Hotspots */
+/* --- Hotspots --- */
 .hotspot {
-  position: absolute; width: 28px; height: 28px; border-radius: 50%;
-  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
-  cursor: pointer; transform: translate(-50%, -50%); transition: background 0.2s, transform 0.2s;
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0,255,255,0.25);
+  border: 1px solid rgba(0,255,255,0.8);
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.3s ease;
 }
-.hotspot:hover { background: rgba(255,255,255,0.3); transform: translate(-50%, -50%) scale(1.1); }
-
-/* Modale */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-.hidden { display: none !important; }
-.modal-content { background: #121821; padding: 1.2rem 1.4rem; border-radius: 12px; width: 520px; border: 1px solid rgba(255,255,255,0.08); }
-.modal-content h3 { color: #9dd1ff; }
-.range-line { display: flex; align-items: center; gap: 0.6rem; }
-.buttons { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
-
-/* Groupe facturation dans la modale */
-.billing-group { border: 1px dashed rgba(255,255,255,0.2); border-radius: 10px; padding: 0.8rem; }
-.billing-group legend { color: #ffd580; padding: 0 0.5rem; }
-.billing-group .chk { display: block; margin: 0.35rem 0; }
-.billing-group .sub { margin: 0.35rem 0 0.2rem 1.3rem; font-size: 0.95rem; color: #cfe7ff; }
-.billing-group select { width: 100%; background: #0f141c; border: 1px solid rgba(255,255,255,0.15); color: #e6edf3; border-radius: 8px; padding: 0.4rem; }
-
-/* Popup Calibration (clics transparents) */
-.calib-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px);
-  display: flex; align-items: center; justify-content: center; z-index: 10000; color: #fff;
-  pointer-events: none; /* clic à travers */
+.hotspot:hover {
+  transform: scale(1.2);
+  background: rgba(0,255,255,0.5);
+  box-shadow: 0 0 10px rgba(0,255,255,0.6);
 }
-/* Effet holographique flottant */
-.calib-card {
-  background: rgba(18, 24, 33, 0.85);
-  border: 1px solid rgba(0, 255, 255, 0.25);
-  border-radius: 14px;
-  padding: 1.5rem 2rem; text-align: center;
-  box-shadow: 0 0 25px rgba(0, 255, 255, 0.25), inset 0 0 20px rgba(0, 255, 255, 0.05);
-  animation: hologramFloat 3s ease-in-out infinite, hologramGlow 2.5s ease-in-out infinite alternate;
-  backdrop-filter: blur(6px);
-  pointer-events: all; transition: opacity 0.4s ease;
+.hotspot-label {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #0ff;
+  font-size: 10px;
+  background: rgba(0,0,0,0.7);
+  padding: 1px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  display: none;
 }
-@keyframes hologramFloat { 0%,100% { transform: translateY(-4px); } 50% { transform: translateY(4px); } }
-@keyframes hologramGlow {
-  0% { box-shadow: 0 0 18px rgba(0,255,255,0.25), inset 0 0 10px rgba(0,255,255,0.05); }
-  100% { box-shadow: 0 0 28px rgba(0,255,255,0.45), inset 0 0 20px rgba(0,255,255,0.15); }
-}
-.calib-card h3 { color: #00ffff; font-weight: 600; text-shadow: 0 0 8px rgba(0,255,255,0.6); animation: hologramTitlePulse 2.8s infinite; }
-@keyframes hologramTitlePulse { 0%,100% { opacity: 1; text-shadow: 0 0 8px rgba(0,255,255,0.6); } 50% { opacity: 0.8; text-shadow: 0 0 16px rgba(0,255,255,0.9); } }
-.calib-card p { color: #c6f8ff; font-size: 0.95rem; line-height: 1.4rem; }
 
-/* Halo & flash calibration */
-.calib-halo { position: absolute; width: 90px; height: 90px; border-radius: 50%; background: radial-gradient(rgba(0,255,255,0.5), transparent 70%); pointer-events: none; transform: translate(-50%, -50%); animation: haloPulse 1s infinite alternate; z-index: 9999; }
-@keyframes haloPulse { from { opacity: 0.5; transform: translate(-50%, -50%) scale(0.9);} to { opacity: 1; transform: translate(-50%, -50%) scale(1.1);} }
-.calib-flash { position: fixed; inset: 0; background: rgba(0,255,255,0.25); backdrop-filter: blur(3px); z-index: 9998; animation: flashOut 0.5s forwards; }
-@keyframes flashOut { from { opacity: 1; } to { opacity: 0; } }
-
-/* Infos convalescence & facturation dans le panneau */
-.injury-total, .billing-info {
-  margin-top: 0.8rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem;
+/* --- Panneau latéral --- */
+#injury-panel {
+  flex: 1;
+  background: #181c22;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 0 15px rgba(0,255,255,0.1);
+  max-height: 90vh;
+  overflow-y: auto;
 }
-.injury-total { color: #9dd1ff; }
+#injury-panel h2 {
+  margin-top: 0;
+  color: #0ff;
+  text-align: center;
+  text-shadow: 0 0 8px rgba(0,255,255,0.3);
+}
+.injury-group h3 {
+  color: #9df;
+  margin-bottom: 4px;
+}
+.injury-item {
+  font-size: 0.9rem;
+  margin-left: 12px;
+  margin-bottom: 4px;
+}
+
+/* --- Résumé convalescence & facturation --- */
+.injury-total {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  color: #9df;
+  font-size: 0.9rem;
+}
 .injury-total strong { color: #fff; }
-.billing-info { color: #ffdd9d; }
-.billing-info strong { color: #fff; }
-.billing-info h4 { margin: 0.3rem 0; color: #ffd580; text-shadow: 0 0 6px rgba(255,215,120,0.4); }
 
-/* Bouton son */
-.sound-btn {
-  position: fixed; top: 10px; right: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 50%; font-size: 1.4rem; color: #90c2ff; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
-  backdrop-filter: blur(4px); z-index: 10000;
+.billing-info {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  color: #ffdd9d;
+  font-size: 0.9rem;
 }
-.sound-btn:hover { background: rgba(255,255,255,0.15); }
+.billing-info strong { color: #fff; }
+.billing-info h4 {
+  margin: 0.3rem 0;
+  color: #ffd580;
+  text-shadow: 0 0 6px rgba(255,215,120,0.4);
+}
+
+/* --- Boutons du panneau --- */
+.panel-buttons {
+  margin-top: 10px;
+  text-align: center;
+}
+.panel-buttons button {
+  background: #0ff;
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  margin: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.panel-buttons button:hover {
+  background: #09f;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(0,255,255,0.5);
+}
+
+/* --- Fenêtre modale --- */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+.modal.hidden {
+  display: none;
+}
+.modal-content {
+  background: #1c2129;
+  border-radius: 10px;
+  padding: 20px;
+  width: 350px;
+  box-shadow: 0 0 20px rgba(0,255,255,0.2);
+}
+.modal-content h3 {
+  margin-top: 0;
+  color: #0ff;
+  text-align: center;
+}
+.modal-content label {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+.modal-content select,
+.modal-content input[type="range"] {
+  width: 100%;
+  margin-top: 4px;
+}
+.diagnostic-text {
+  background: rgba(0,0,0,0.4);
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+.modal-buttons {
+  text-align: center;
+  margin-top: 10px;
+}
+.modal-buttons button {
+  background: #0ff;
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  margin: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.modal-buttons button:hover {
+  background: #09f;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(0,255,255,0.4);
+}
+
+/* --- Scroll doux et esthétique --- */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0,255,255,0.4);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-track {
+  background-color: rgba(255,255,255,0.05);
+}
