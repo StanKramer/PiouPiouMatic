@@ -1,12 +1,13 @@
 /* ================================================================
-   PiouPiouMatic RP — Build final (sans calibration)
+   PiouPiouMatic RP — Build final
    - Hotspots absolus sur body_both.png (1024x1024)
-   - Mode Admin (double-clic logo): édition + export
-   - Résumé par zones, convalescence, facturation non cumulative
-   - Cases à cocher (réanimation extérieure, agent public) dans le résumé
+   - Mode Admin (double-clic logo): édition + export + centrer + quitter
+   - Résumé par zones, convalescence recalibrée, facturation dynamique
+   - Non cumulativité des soins, pharmacie non facturée
+   - Lieux de réanimation (aucun / Blaine / Cayo) + options Agent public / Réa extérieure
 ================================================================ */
 
-/* ---------- Références DOM de base ---------- */
+/* ---------- Références DOM ---------- */
 const bodyMap       = document.getElementById("body-map");
 const imgEl         = document.getElementById("body-image");
 const modal         = document.getElementById("injury-modal");
@@ -22,14 +23,14 @@ const saveBtn       = document.getElementById("save-injury");
 const closeBtn      = document.getElementById("close-modal");
 const injuryList    = document.getElementById("injury-list");
 const panel         = document.getElementById("injury-panel");
+const resetBtn      = document.getElementById("reset-btn");
 
 /* ---------- Constantes image ---------- */
 const IMG_WIDTH  = 1024;
 const IMG_HEIGHT = 1024;
 
-/* ---------- Coordonnées fixes (pixels réels) ---------- */
+/* ---------- Coordonnées finales fournies (pixels réels) ---------- */
 let ZONES = [
- const ZONES = [
   { id: "head", x: 256, y: 80, name: "Tête", tags: ["head","front"] },
   { id: "face", x: 256, y: 140, name: "Visage", tags: ["head","front"] },
   { id: "neck", x: 256, y: 190, name: "Cou", tags: ["neck","front"] },
@@ -79,7 +80,6 @@ function createHotspot(zone) {
   s.dataset.y = zone.y;
   s.title = zone.name;
 
-  // Label (affiché en mode édition)
   const lbl = document.createElement("div");
   lbl.className = "hotspot-label";
   lbl.textContent = zone.name;
@@ -114,7 +114,7 @@ function positionHotspots() {
 
 ["resize","scroll"].forEach(evt => window.addEventListener(evt, positionHotspots));
 
-/* ---------------- Drag & Drop (mode édition) ----------------- */
+/* ---------- Drag & drop en mode édition ---------- */
 let adminMode = false;
 let editMode  = false;
 let dragging  = null;
@@ -145,20 +145,17 @@ function onMouseMove(e) {
   const mapRect = bodyMap.getBoundingClientRect();
   const imgRect = imgEl.getBoundingClientRect();
 
-  // Position écran -> clamp sur la zone image
   let left = e.clientX - dragOffset.x;
   let top  = e.clientY - dragOffset.y;
 
-  // Contraint aux bords de l'image
   left = Math.max(imgRect.left, Math.min(left, imgRect.right  - dragging.offsetWidth));
   top  = Math.max(imgRect.top,  Math.min(top,  imgRect.bottom - dragging.offsetHeight));
 
   dragging.style.left = (left - mapRect.left) + "px";
   dragging.style.top  = (top  - mapRect.top ) + "px";
 }
-function onMouseUp(e) {
+function onMouseUp() {
   if (!editMode || !dragging) return;
-  // Recalcule x,y en pixels réels à partir de la position
   const imgRect = imgEl.getBoundingClientRect();
   const mapRect = bodyMap.getBoundingClientRect();
   const currentLeft = parseFloat(dragging.style.left) + mapRect.left;
@@ -172,13 +169,9 @@ function onMouseUp(e) {
   dragging.dataset.x = px;
   dragging.dataset.y = py;
 
-  // Met à jour ZONES
   const id = dragging.dataset.id;
   const idx = ZONES.findIndex(z => z.id === id);
-  if (idx >= 0) {
-    ZONES[idx].x = px;
-    ZONES[idx].y = py;
-  }
+  if (idx >= 0) { ZONES[idx].x = px; ZONES[idx].y = py; }
 
   dragging = null;
 }
@@ -187,22 +180,16 @@ function onMouseUp(e) {
    Mode Admin secret (double-clic sur le logo)
 ================================================================ */
 const logo = document.querySelector(".logo");
-let adminUI = null, editBtn = null, exportBtn = null, toastEl = null;
+let adminUI = null, editBtn = null, exportBtn = null, centerBtn = null, quitBtn = null, toastEl = null;
 
 function showToast(msg) {
   if (!toastEl) {
     toastEl = document.createElement("div");
-    toastEl.style.position = "fixed";
-    toastEl.style.bottom = "16px";
-    toastEl.style.left = "50%";
-    toastEl.style.transform = "translateX(-50%)";
-    toastEl.style.background = "rgba(0,0,0,0.8)";
-    toastEl.style.border = "1px solid rgba(0,255,255,0.4)";
-    toastEl.style.color = "#0ff";
-    toastEl.style.fontSize = "13px";
-    toastEl.style.padding = "8px 12px";
-    toastEl.style.borderRadius = "8px";
-    toastEl.style.zIndex = "99999";
+    Object.assign(toastEl.style, {
+      position: "fixed", bottom: "16px", left: "50%", transform: "translateX(-50%)",
+      background: "rgba(0,0,0,0.8)", border: "1px solid rgba(0,255,255,0.4)",
+      color: "#0ff", fontSize: "13px", padding: "8px 12px", borderRadius: "8px", zIndex: 99999
+    });
     document.body.appendChild(toastEl);
   }
   toastEl.textContent = msg;
@@ -213,31 +200,30 @@ function showToast(msg) {
 function buildAdminUI() {
   if (adminUI) return;
   adminUI = document.createElement("div");
-  adminUI.style.position = "fixed";
-  adminUI.style.bottom = "20px";
-  adminUI.style.right  = "20px";
-  adminUI.style.display = "flex";
-  adminUI.style.gap = "10px";
-  adminUI.style.zIndex = "99998";
+  Object.assign(adminUI.style, {
+    position: "fixed", bottom: "20px", right: "20px", display: "flex", gap: "10px", zIndex: 99998
+  });
 
   editBtn = document.createElement("button");
-  editBtn.textContent = "🧭 Éditer les hotspots";
-  editBtn.style.padding = "8px 12px";
-  editBtn.style.borderRadius = "8px";
-  editBtn.style.background = "#0ff";
-  editBtn.style.color = "#000";
-  editBtn.style.fontWeight = "600";
+  editBtn.textContent = "🧭 Éditer";
+  styleAdminBtn(editBtn, "#0ff", "#000");
 
   exportBtn = document.createElement("button");
-  exportBtn.textContent = "💾 Exporter positions";
-  exportBtn.style.padding = "8px 12px";
-  exportBtn.style.borderRadius = "8px";
-  exportBtn.style.background = "#09f";
-  exportBtn.style.color = "#fff";
-  exportBtn.style.fontWeight = "600";
+  exportBtn.textContent = "💾 Exporter";
+  styleAdminBtn(exportBtn, "#09f", "#fff");
+
+  centerBtn = document.createElement("button");
+  centerBtn.textContent = "🎯 Centrer";
+  styleAdminBtn(centerBtn, "#7cf", "#000");
+
+  quitBtn = document.createElement("button");
+  quitBtn.textContent = "🚪 Quitter";
+  styleAdminBtn(quitBtn, "#f66", "#000");
 
   adminUI.appendChild(editBtn);
   adminUI.appendChild(exportBtn);
+  adminUI.appendChild(centerBtn);
+  adminUI.appendChild(quitBtn);
   document.body.appendChild(adminUI);
 
   editBtn.addEventListener("click", () => {
@@ -255,6 +241,25 @@ function buildAdminUI() {
     navigator.clipboard.writeText(out);
     showToast("💾 Coordonnées copiées dans le presse-papiers.");
   });
+
+  centerBtn.addEventListener("click", () => {
+    positionHotspots();
+    showToast("🎯 Hotspots centrés visuellement.");
+  });
+
+  quitBtn.addEventListener("click", () => {
+    adminMode = false; editMode = false; disableDragHandlers();
+    if (adminUI) adminUI.style.display = "none";
+    positionHotspots();
+    showToast("🧭 Mode Admin désactivé");
+  });
+}
+
+function styleAdminBtn(btn, bg, fg) {
+  Object.assign(btn.style, {
+    padding: "8px 12px", borderRadius: "8px", border: "none",
+    background: bg, color: fg, fontWeight: 600, cursor: "pointer"
+  });
 }
 
 if (logo) {
@@ -263,27 +268,29 @@ if (logo) {
     if (adminMode) {
       buildAdminUI();
       adminUI.style.display = "flex";
-      showToast("🧭 Mode Admin activé — Éditez vos hotspots");
+      showToast("🧭 Mode Admin activé — édition & export");
     } else {
-      editMode = false; disableDragHandlers(); positionHotspots();
+      editMode = false; disableDragHandlers();
       if (adminUI) adminUI.style.display = "none";
       showToast("🧭 Mode Admin désactivé");
     }
+    positionHotspots();
   });
 }
 
 /* ================================================================
-   Moteur médical (diag simple) + Saisie blessures
+   Moteur médical (diag simplifié) + Saisie blessures
 ================================================================ */
-let injuries = []; // { zone, id, type, pain, tags, ts }
+let injuries = []; // { zone,id,tags,type,pain,ts, care, advice }
 
 function openModal(zone) {
-  currentZone = zone;
   modal.classList.remove("hidden");
   document.getElementById("zone-title").textContent = `Blessure — ${zone.name}`;
-  updateDiagnosis(); // remplit les textes
+  updateDiagnosis(); // texte auto
+  // Mémorise zone active pour save
+  openModal.currentZone = zone;
 }
-function closeModalWindow() { modal.classList.add("hidden"); currentZone = null; }
+function closeModalWindow() { modal.classList.add("hidden"); openModal.currentZone = null; }
 if (closeBtn) closeBtn.addEventListener("click", closeModalWindow);
 
 function updateDiagnosis() {
@@ -291,37 +298,91 @@ function updateDiagnosis() {
   const pain = parseInt(painLevel.value, 10);
   diagnosisText.textContent = `Atteinte ${type} — douleur ${pain}/10.`;
   symptomText.textContent   = "Douleur localisée, inflammation probable.";
-  treatmentText.textContent = "Antalgique, désinfection, repos.";
-  adviceText.textContent    = "Surveillance 24–48 h.";
+  const care   = CARE_BY_TYPE[type]?.care   || "Antalgique, désinfection, repos.";
+  const advice = CARE_BY_TYPE[type]?.advice || "Suivi à l’Ocean Medical Center si persistant.";
+  treatmentText.textContent = `Soin : ${care}`;
+  adviceText.textContent    = `Recommandation : ${advice}`;
   detailsText.textContent   = "Procédure : nettoyage, contrôle douleur, imagerie si nécessaire.";
 }
 painLevel.addEventListener("input", () => { painValue.textContent = painLevel.value; updateDiagnosis(); });
 injuryType.addEventListener("change", updateDiagnosis);
 
 saveBtn.addEventListener("click", () => {
-  if (!currentZone) return;
+  const zone = openModal.currentZone;
+  if (!zone) return;
+  const type = injuryType.value;
+  const pain = parseInt(painLevel.value, 10);
+  const care   = CARE_BY_TYPE[type]?.care   || "Antalgique, désinfection, repos.";
+  const advice = CARE_BY_TYPE[type]?.advice || "Suivi à l’Ocean Medical Center si persistant.";
   injuries.unshift({
-    zone: currentZone.name,
-    id:   currentZone.id,
-    tags: currentZone.tags,
-    type: injuryType.value,
-    pain: parseInt(painLevel.value,10),
-    ts:   Date.now()
+    zone: zone.name, id: zone.id, tags: zone.tags,
+    type, pain, ts: Date.now(),
+    care, advice
   });
-  renderSummary();
   closeModalWindow();
+  renderSummary(); // ⚡ MAJ en temps réel
 });
 
 /* ================================================================
-   Résumé par zones -> Convalescence -> Facturation
+   Connaissance médicale (soins + reco OMC) + actes & tarifs
 ================================================================ */
+const CARE_BY_TYPE = {
+  "contondante": { care: "Glaçage + repos + antalgique", advice: "Surveille hématomes 24h, contrôle à l’Ocean Medical Center si douleur persistante." },
+  "arme blanche": { care: "Suture + désinfection", advice: "Vérifier vaccination antitétanique à l’Ocean Medical Center." },
+  "arme feu": { care: "Chirurgie + IRM + surveillance", advice: "Suivi post-opératoire obligatoire à l’Ocean Medical Center." },
+  "fracture": { care: "Plâtre ou attelle + radiographie", advice: "Contrôle orthopédique sous 15 jours à l’Ocean Medical Center." },
+  "luxation": { care: "Réduction + attelle", advice: "Rééducation kinésithérapie à l’Ocean Medical Center." },
+  "brulure": { care: "Pansement stérile + crème cicatrisante", advice: "Suivi cicatriciel à l’Ocean Medical Center." },
+  "chute": { care: "Scanner + observation", advice: "Bilan complet 48h à l’Ocean Medical Center." },
+  "morsure": { care: "Nettoyage + antibiothérapie + vaccin", advice: "Contrôle du risque infectieux à l’Ocean Medical Center." },
+  "entorse": { care: "Attelle + glace", advice: "Consultation kiné si douleur / laxité, à l’Ocean Medical Center." },
+  "perforation": { care: "Chirurgie + antibiothérapie", advice: "Surveillance 48h à l’Ocean Medical Center." },
+  "ecrasement": { care: "IRM + drainage si besoin", advice: "Suivi traumatologique à l’Ocean Medical Center." },
+  "avp": { care: "IRM + observation 24h", advice: "Contrôle vital complet à l’Ocean Medical Center." },
+  "contusion": { care: "Glaçage + anti-inflammatoire", advice: "Repos et suivi à l’Ocean Medical Center." }
+};
 
-/* --- Regroupement par régions anatomiques --- */
+const ACTS_BY_TYPE = {
+  "arme feu":   ["IRM", "Chirurgie (si indiqué)"],
+  "fracture":   ["Plâtre + Radio"],
+  "brulure":    ["Pansement / Bandage"],           // pharmacie (non facturé)
+  "arme blanche":["Sutures"],
+  "luxation":   ["Attelle"],
+  "chute":      ["Scanner"],
+  "perforation":["Chirurgie (si indiqué)"],
+  "avp":        ["Scanner"],
+  "ecrasement": ["Surveillance + Imagerie"],
+  "morsure":    ["Irrigation + ATB"],
+  "entorse":    ["Immobilisation courte"],
+  "contondante":["Trousse de soin"],               // pharmacie (non facturé)
+  "contusion":  ["Trousse de soin"]                // pharmacie (non facturé)
+};
+
+const ACT_PRICES = {
+  "Base hospitalière": 800,
+  "IRM": 5000,
+  "Plâtre + Radio": 4300,
+  "Pansement / Bandage": 1000, // pharmacie
+  "Sutures": 800,
+  "Attelle": 1000,
+  "Scanner": 3000,
+  "Chirurgie (si indiqué)": 5000,
+  "Surveillance + Imagerie": 1000,
+  "Irrigation + ATB": 1000,
+  "Immobilisation courte": 500,
+  "Trousse de soin": 1000      // pharmacie
+};
+
+// actes à lister mais non facturer
+const PHARMACY_ACTS = new Set(["Pansement / Bandage", "Trousse de soin"]);
+
+/* ================================================================
+   Regroupement, convalescence recalibrée, facturation dynamique
+================================================================ */
 function regionOf(i) {
   const t = i.tags || [];
   const L = t.includes("L"), R = t.includes("R");
-  if (t.includes("head"))   return "Tête & Cou";
-  if (t.includes("neck"))   return "Tête & Cou";
+  if (t.includes("head") || t.includes("neck")) return "Tête & Cou";
   if (t.includes("thorax") || t.includes("abdomen") || t.includes("groin")) return "Tronc (avant)";
   if (t.includes("back") || t.includes("hip")) return "Tronc (arrière)";
   if (t.includes("arm") || t.includes("shoulder")) return L ? "Membre supérieur gauche" : R ? "Membre supérieur droit" : "Membres supérieurs";
@@ -339,9 +400,13 @@ function groupInjuriesByRegion(list) {
   return groups;
 }
 
-/* --- Convalescence --- */
+/* --- Convalescence (recalibrée) ---
+   Pire blessure (gravité 5, douleur 10) => 24h extérieur (1440 min)
+   Chambre : min(sev * pain * 0.6, 30)
+   Extérieur: min(max(sev * pain * 4.8, 10), 1440)
+*/
 function severityOf(type){
-  if (["contondante","chute","entorse"].includes(type)) return 1;
+  if (["contondante","chute","entorse","contusion"].includes(type)) return 1;
   if (["arme blanche","morsure","ecrasement"].includes(type)) return 2;
   if (["fracture","luxation","perforation"].includes(type)) return 3;
   if (["brulure","avp"].includes(type)) return 4;
@@ -354,67 +419,44 @@ function computeRecovery(list, where="exterieur"){
   list.forEach(i=>{
     const sev = severityOf(i.type), pain=i.pain||1;
     const minutes = (where==="chambre")
-      ? Math.min(sev* pain * 0.5, 30)
-      : Math.min(Math.max(sev* pain * 10, 10), 1440);
+      ? Math.min(sev * pain * 0.6, 30)
+      : Math.min(Math.max(sev * pain * 4.8, 10), 1440);
     if (minutes>maxMin) maxMin = minutes;
   });
   const h = Math.floor(maxMin/60), m=Math.round(maxMin%60);
   return h>0 ? `${h} h ${m} min` : `${m} min`;
 }
 
-/* --- Facturation non cumulative + contrôles --- */
-const ACTS_BY_TYPE = {
-  "arme feu":   ["IRM"],
-  "fracture":   ["Plâtre + Radio"],
-  "brulure":    ["Pansement / Bandage"],
-  "arme blanche":["Sutures"],
-  "luxation":   ["Attelle"],
-  "chute":      ["Scanner"],
-  "perforation":["Chirurgie (si indiqué)"],
-  "avp":        ["Scanner"],
-  "ecrasement": ["Surveillance + Imagerie"],
-  "morsure":    ["Irrigation + ATB"],
-  "entorse":    ["Immobilisation courte"],
-  "contondante":["Trousse de soin"]
-};
-const ACT_PRICES = {
-  "Base hospitalière": 800,
-  "IRM": 5000,
-  "Plâtre + Radio": 4300,
-  "Pansement / Bandage": 1000,
-  "Sutures": 800,
-  "Attelle": 1000,
-  "Scanner": 3000,
-  "Chirurgie (si indiqué)": 5000,
-  "Surveillance + Imagerie": 1000,
-  "Irrigation + ATB": 1000,
-  "Immobilisation courte": 500,
-  "Trousse de soin": 1000
-};
+/* --- Facturation non cumulative + options --- */
+const reviveLocationFees = { none: 0, blaine: 2000, cayo: 3000 };
 
 function calculateBilling(list, opts){
-  // set d’actes uniques
   const acts = new Set();
   list.forEach(i => {
-    const arr = ACTS_BY_TYPE[i.type] || ["Trousse de soin"];
+    const arr = ACTS_BY_TYPE[i.type] || [];
     arr.forEach(a => acts.add(a));
   });
 
-  // base hospitalière
   let total = ACT_PRICES["Base hospitalière"];
   const details = [`Base hospitalière : ${ACT_PRICES["Base hospitalière"].toLocaleString()}$`];
 
-  // actes uniques
   acts.forEach(a=>{
     const price = ACT_PRICES[a] || 0;
-    total += price;
-    details.push(`${a} : ${price.toLocaleString()}$`);
+    const isPharma = PHARMACY_ACTS.has(a);
+    const line = isPharma ? `${a} : 0$ (pharmacie — non facturé)` : `${a} : ${price.toLocaleString()}$`;
+    details.push(line);
+    if (!isPharma) total += price;
   });
 
-  // options
   if (opts.reviveOutside) {
     total += 1500;
     details.push(`Réanimation extérieure : 1 500$`);
+  }
+  const locFee = reviveLocationFees[opts.reviveLocation || "none"] || 0;
+  if (locFee > 0) {
+    const label = opts.reviveLocation === "cayo" ? "Cayo Perico" : "Blaine County / Paleto";
+    details.push(`Réanimation sur site (${label}) : ${locFee.toLocaleString()}$`);
+    total += locFee;
   }
   if (opts.publicAgent) {
     total = total / 2;
@@ -424,53 +466,53 @@ function calculateBilling(list, opts){
   return { total: Math.round(total), details };
 }
 
-/* --- UI des contrôles facture (dans le résumé) --- */
-let billControls = null;
-const billState = { reviveOutside: false, publicAgent: false };
-
 /* ================================================================
-   Rendu du panneau : Zones -> Convalescence -> Facturation
+   UI Facturation (contrôles) + rendu panneau
 ================================================================ */
+let billControls = null;
+const billState = { reviveOutside: false, publicAgent: false, reviveLocation: "none" };
+
 function renderSummary(){
   if (!injuryList) return;
 
-  // 0) Aucune blessure
+  // 1) Blessures par zones (avec soin + reco)
   if (injuries.length === 0) {
     injuryList.innerHTML = "<p>Aucune blessure détectée</p>";
-    renderBillingSection(); // affiche quand même les contrôles
-    return;
+  } else {
+    const groups = groupInjuriesByRegion(injuries);
+    let html = "";
+    Object.keys(groups).sort().forEach(region=>{
+      html += `<div class="injury-group"><h3>🦴 ${region}</h3>`;
+      groups[region].forEach(i=>{
+        html += `
+          <div class="injury-item">• ${i.zone} — ${i.type} (Douleur ${i.pain}/10)
+            <div style="margin-left:12px; font-size:.85rem; color:#9df;">
+              🩹 <em>Soin :</em> ${i.care}<br>
+              💬 <em>Recommandation :</em> ${i.advice}
+            </div>
+          </div>`;
+      });
+      html += `</div>`;
+    });
+
+    // 2) Convalescence
+    const recIn  = computeRecovery(injuries, "chambre");
+    const recOut = computeRecovery(injuries, "exterieur");
+    html += `
+      <div class="injury-total">
+        <hr>
+        <p>🏥 <strong>Convalescence en chambre :</strong> ${recIn}</p>
+        <p>🌄 <strong>Convalescence en extérieur :</strong> ${recOut}</p>
+      </div>
+    `;
+    injuryList.innerHTML = html;
   }
 
-  // 1) Blessures par zones
-  const groups = groupInjuriesByRegion(injuries);
-  let html = "";
-  Object.keys(groups).sort().forEach(region=>{
-    html += `<div class="injury-group"><h3>🦴 ${region}</h3>`;
-    groups[region].forEach(i=>{
-      html += `<div class="injury-item">• ${i.zone} — ${i.type} (Douleur ${i.pain}/10)</div>`;
-    });
-    html += `</div>`;
-  });
-
-  // 2) Convalescence
-  const recIn  = computeRecovery(injuries, "chambre");
-  const recOut = computeRecovery(injuries, "exterieur");
-  html += `
-    <div class="injury-total">
-      <hr>
-      <p>🏥 <strong>Convalescence en chambre :</strong> ${recIn}</p>
-      <p>🌄 <strong>Convalescence en extérieur :</strong> ${recOut}</p>
-    </div>
-  `;
-
-  injuryList.innerHTML = html;
-
-  // 3) Facturation (non cumulative) + contrôles
-  renderBillingSection();
+  // 3) Facturation + contrôles
+  renderBillingSection(); // construit/MAJ la facture et ses contrôles
 }
 
 function renderBillingSection(){
-  // Crée/Met à jour le bloc facturation en bas du panneau
   let billDiv = document.querySelector(".billing-info");
   if (!billDiv) {
     billDiv = document.createElement("div");
@@ -478,17 +520,25 @@ function renderBillingSection(){
     panel.appendChild(billDiv);
   }
 
-  // Contrôles (checkbox) si absents
+  // Construire les contrôles s’ils n’existent pas
   if (!billControls) {
     billControls = document.createElement("div");
     billControls.style.marginTop = "0.6rem";
     billControls.innerHTML = `
-      <label style="display:block;margin:.3rem 0;">
-        <input type="checkbox" id="chk-revive"> Réanimation à l’extérieur (+1 500$)
-      </label>
-      <label style="display:block;margin:.3rem 0;">
-        <input type="checkbox" id="chk-public"> Agent des services publics (−50%)
-      </label>
+      <div style="margin:.5rem 0;">
+        <label style="display:block;margin:.3rem 0;">
+          <input type="checkbox" id="chk-revive"> Réanimation à l’extérieur (+1 500$)
+        </label>
+        <label style="display:block;margin:.3rem 0;">
+          <input type="checkbox" id="chk-public"> Agent des services publics (−50%)
+        </label>
+      </div>
+      <div style="margin:.5rem 0;">
+        <div style="margin-bottom:.2rem;">📍 Lieu de réanimation</div>
+        <label style="display:block;"><input type="radio" name="revive-loc" value="none"  checked> Aucun (défaut)</label>
+        <label style="display:block;"><input type="radio" name="revive-loc" value="blaine"> Blaine County / Paleto (+2 000$)</label>
+        <label style="display:block;"><input type="radio" name="revive-loc" value="cayo"> Cayo Perico (+3 000$)</label>
+      </div>
     `;
     billDiv.appendChild(billControls);
 
@@ -500,43 +550,47 @@ function renderBillingSection(){
       billState.publicAgent = e.target.checked;
       updateBillingUI();
     });
+    billControls.querySelectorAll('input[name="revive-loc"]').forEach(r=>{
+      r.addEventListener("change", (e)=>{
+        billState.reviveLocation = e.target.value;
+        updateBillingUI();
+      });
+    });
   }
 
-  // Calcul + rendu détails
+  // Premier rendu
   updateBillingUI();
 }
 
 function updateBillingUI(){
-  const billDiv = document.querySelector(".billing-info");
+  let billDiv = document.querySelector(".billing-info");
   const calc = calculateBilling(injuries, billState);
 
-  // Nettoie (sauf les contrôles)
   billDiv.innerHTML = `
     <hr>
     <h4>💰 Facturation RP</h4>
     ${calc.details.map(d=>`<p>${d}</p>`).join("")}
     <p><strong>Total : ${calc.total.toLocaleString()}$</strong></p>
   `;
-
-  // Réinjecte les contrôles
+  // Réinjecter les contrôles
   if (billControls) billDiv.appendChild(billControls);
 
-  // Recocher l'état actuel (au cas où le DOM a été reconstruit)
+  // Rétablir états
   billControls.querySelector("#chk-revive").checked = billState.reviveOutside;
   billControls.querySelector("#chk-public").checked = billState.publicAgent;
+  billControls.querySelectorAll('input[name="revive-loc"]').forEach(r=>{
+    r.checked = (r.value === billState.reviveLocation);
+  });
 }
 
 /* ================================================================
    Reset + Initialisation
 ================================================================ */
-const resetBtn = document.getElementById("reset-btn");
 if (resetBtn) resetBtn.addEventListener("click", () => {
   injuries = [];
   renderSummary();
   alert("🩺 Système réinitialisé.");
 });
-
-let currentZone = null;
 
 window.addEventListener("DOMContentLoaded", () => {
   refreshHotspots();
