@@ -2,16 +2,19 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PiouPiouMatic — Diagnostic RP</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
+  <!-- Interrupteur sonore -->
+  <button id="sound-toggle" title="Activer/Désactiver le son" class="sound-btn">🔇</button>
+
   <h1 class="title">🩺 PiouPiouMatic — Interface de diagnostic RP</h1>
 
   <main>
     <section id="body-map">
-      <img src="assets/body_both.png" alt="Corps humain face et dos" id="body-image" />
+      <img src="body_both.png" alt="Corps humain face et dos" id="body-image"/>
     </section>
 
     <aside id="injury-panel">
@@ -22,23 +25,35 @@
     </aside>
   </main>
 
-  <!-- Modal de blessure -->
-  <div id="injury-modal" class="modal hidden" aria-hidden="true">
+  <!-- Fenêtre modale -->
+  <div id="injury-modal" class="modal hidden" aria-hidden="true" role="dialog">
     <div class="modal-content">
       <h3 id="zone-title">Nouvelle blessure</h3>
 
-      <label>Type de blessure :</label>
+      <label for="injury-type">Type de blessure :</label>
       <select id="injury-type">
         <option value="arme feu">Arme à feu</option>
         <option value="arme blanche">Arme blanche</option>
-        <option value="contendante">Contondante</option>
+        <option value="contondante">Contondante</option>
+        <option value="fracture">Fracture</option>
+        <option value="brulure">Brûlure</option>
+        <option value="entorse">Entorse</option>
+        <option value="luxation">Luxation</option>
+        <option value="morsure">Morsure</option>
+        <option value="ecrasement">Écrasement</option>
+        <option value="perforation">Perforation</option>
         <option value="avp">Accident de véhicule</option>
         <option value="chute">Chute</option>
       </select>
 
-      <label>Douleur (1–10) :</label>
-      <input type="range" id="pain-level" min="1" max="10" value="5" />
+      <label for="pain-level">Douleur (1–10) :</label>
+      <input type="range" id="pain-level" min="1" max="10" value="5"/>
       <span id="pain-value">5</span>
+
+      <div class="diagnosis">
+        <strong>Diagnostic :</strong>
+        <p id="diagnosis-text">—</p>
+      </div>
 
       <div class="symptoms">
         <strong>Symptômes :</strong>
@@ -48,6 +63,16 @@
       <div class="treatment">
         <strong>Traitement :</strong>
         <p id="treatment-text">—</p>
+      </div>
+
+      <div class="advice">
+        <strong>Conseils :</strong>
+        <p id="advice-text">—</p>
+      </div>
+
+      <div class="advanced-details">
+        <strong>Détails avancés :</strong>
+        <p id="details-text" class="fade-in">—</p>
       </div>
 
       <div class="buttons">
