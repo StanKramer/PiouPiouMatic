@@ -1,6 +1,6 @@
 /* ================================================================
-   PiouPiouMatic RP - Script principal
-   PARTIE 1 : Variables, zones, hotspots, calibration automatique
+   PiouPiouMatic RP - Script principal calibré
+   PARTIE 1 : Variables globales, calibration automatique, zones anatomiques
 ================================================================ */
 
 /* ---------- Références DOM ---------- */
@@ -19,22 +19,21 @@ const saveBtn = document.getElementById("save-injury");
 const closeBtn = document.getElementById("close-modal");
 const injuryList = document.getElementById("injury-list");
 
-/* ---------- État global ---------- */
-let soundEnabled = false;
+/* ---------- Variables globales ---------- */
 let injuries = [];
 let currentZone = null;
+let soundEnabled = false;
 let groinClicks = 0;
 let clickCount = 0;
 let codeBlueThreshold = Math.floor(100 + Math.random() * 20);
 
+/* ---------- Gestion du son ---------- */
 const soundToggle = document.getElementById("sound-toggle");
 soundToggle.textContent = "🔇";
 soundToggle.addEventListener("click", () => {
   soundEnabled = !soundEnabled;
   soundToggle.textContent = soundEnabled ? "🔊" : "🔇";
 });
-
-/* ---------- Sons ---------- */
 function activateSoundSystem() {
   if (soundEnabled) return;
   soundEnabled = true;
@@ -56,54 +55,7 @@ function playSound(type) {
 }
 
 /* ================================================================
-   🔹 ZONES ANATOMIQUES (face + dos)
-================================================================ */
-const zones = [
-  // FACE
-  {id:"head",x:25,y:9,name:"Crâne / Tête (face)",tags:["head"]},
-  {id:"forehead",x:25,y:12,name:"Front",tags:["head"]},
-  {id:"eye-left",x:24,y:14,name:"Œil gauche",tags:["eye"]},
-  {id:"eye-right",x:26,y:14,name:"Œil droit",tags:["eye"]},
-  {id:"nose",x:25,y:16,name:"Nez",tags:["face"]},
-  {id:"jaw",x:25,y:18,name:"Mâchoire",tags:["jaw"]},
-  {id:"neck-front",x:25,y:21,name:"Cou (face)",tags:["neck"]},
-  {id:"shoulder-left",x:21,y:22,name:"Épaule gauche",tags:["shoulder","joint"]},
-  {id:"shoulder-right",x:29,y:22,name:"Épaule droite",tags:["shoulder","joint"]},
-  {id:"arm-left",x:20,y:30,name:"Bras gauche",tags:["arm"]},
-  {id:"arm-right",x:30,y:30,name:"Bras droit",tags:["arm"]},
-  {id:"forearm-left",x:19,y:38,name:"Avant-bras gauche",tags:["forearm"]},
-  {id:"forearm-right",x:31,y:38,name:"Avant-bras droit",tags:["forearm"]},
-  {id:"hand-left",x:18,y:50,name:"Main gauche",tags:["hand"]},
-  {id:"hand-right",x:32,y:50,name:"Main droite",tags:["hand"]},
-  {id:"chest-left",x:24,y:26,name:"Thorax gauche",tags:["thorax"]},
-  {id:"chest-right",x:26,y:26,name:"Thorax droit",tags:["thorax"]},
-  {id:"abdomen-upper",x:25,y:34,name:"Abdomen (haut)",tags:["abdomen"]},
-  {id:"abdomen-lower",x:25,y:42,name:"Abdomen (bas)",tags:["abdomen"]},
-  {id:"groin",x:25,y:52,name:"Entre-jambe",tags:["groin"]},
-  {id:"thigh-left",x:23,y:62,name:"Cuisse gauche",tags:["thigh"]},
-  {id:"thigh-right",x:27,y:62,name:"Cuisse droite",tags:["thigh"]},
-  {id:"knee-left",x:23,y:70,name:"Genou gauche",tags:["knee"]},
-  {id:"knee-right",x:27,y:70,name:"Genou droit",tags:["knee"]},
-  {id:"foot-left",x:23,y:92,name:"Pied gauche",tags:["foot"]},
-  {id:"foot-right",x:27,y:92,name:"Pied droit",tags:["foot"]},
-
-  // DOS
-  {id:"head-back",x:75,y:9,name:"Crâne (dos)",tags:["head","back"]},
-  {id:"nape",x:75,y:20,name:"Nuque",tags:["neck","back"]},
-  {id:"scapula-left",x:72,y:26,name:"Omoplate gauche",tags:["shoulder","back"]},
-  {id:"scapula-right",x:78,y:26,name:"Omoplate droite",tags:["shoulder","back"]},
-  {id:"lower-back",x:75,y:40,name:"Dos bas",tags:["back"]},
-  {id:"buttocks",x:75,y:55,name:"Fessier",tags:["back","hip"]},
-  {id:"hamstring-left",x:73,y:62,name:"Ischio gauche",tags:["thigh","back"]},
-  {id:"hamstring-right",x:77,y:62,name:"Ischio droit",tags:["thigh","back"]},
-  {id:"calf-left",x:73,y:78,name:"Mollet gauche",tags:["leg","back"]},
-  {id:"calf-right",x:77,y:78,name:"Mollet droit",tags:["leg","back"]},
-  {id:"achilles-left",x:73,y:86,name:"Tendon d’Achille gauche",tags:["ankle","tendon","back"]},
-  {id:"achilles-right",x:77,y:86,name:"Tendon d’Achille droit",tags:["ankle","tendon","back"]}
-];
-
-/* ================================================================
-   ⚙️ CALIBRATION AUTOMATIQUE SUR L'IMAGE
+   🧭 CALIBRATION AUTOMATIQUE SUR body_both.png
 ================================================================ */
 function autoAlignHotspots() {
   if (!imgEl.complete) return;
@@ -115,28 +67,95 @@ function autoAlignHotspots() {
   zones.forEach((z) => {
     if (!z.x) return;
     if (z.tags && z.tags.includes("back")) {
-      const relativeX = (z.x - 50) / 50; // normalisation moitié droite
+      // moitié droite → dos
+      const rel = (z.x - 50) / 50;
       z.x = ((centerX + margin) / rect.width * 100) +
-            relativeX * ((rect.width / 2 - margin) / rect.width * 100);
+            rel * ((rect.width / 2 - margin) / rect.width * 100);
     } else {
-      const relativeX = z.x / 50;
+      // moitié gauche → face
+      const rel = z.x / 50;
       z.x = (margin / rect.width * 100) +
-            relativeX * ((centerX - margin) / rect.width * 100);
+            rel * ((centerX - margin) / rect.width * 100);
     }
   });
 }
 
 /* ================================================================
-   PiouPiouMatic RP - Script principal
-   PARTIE 2 : Diagnostics, traitements, Code Bleu, positionnement
+   🩺 ZONES ANATOMIQUES CALIBRÉES
+   (toutes coordonnées ajustées à body_both.png)
+================================================================ */
+const zones = [
+  // --- FACE ---
+  {id:"head",x:24,y:8,name:"Crâne / Tête (face)",tags:["head"]},
+  {id:"forehead",x:24,y:11,name:"Front",tags:["head"]},
+  {id:"eye-left",x:23,y:14,name:"Œil gauche",tags:["eye"]},
+  {id:"eye-right",x:25,y:14,name:"Œil droit",tags:["eye"]},
+  {id:"nose",x:24,y:16,name:"Nez",tags:["face"]},
+  {id:"jaw",x:24,y:19,name:"Mâchoire",tags:["jaw"]},
+  {id:"neck-front",x:24,y:22,name:"Cou (face)",tags:["neck"]},
+  {id:"shoulder-left",x:20,y:24,name:"Épaule gauche",tags:["shoulder","joint"]},
+  {id:"shoulder-right",x:28,y:24,name:"Épaule droite",tags:["shoulder","joint"]},
+  {id:"arm-left",x:19,y:30,name:"Bras gauche",tags:["arm"]},
+  {id:"arm-right",x:29,y:30,name:"Bras droit",tags:["arm"]},
+  {id:"elbow-left",x:19,y:36,name:"Coude gauche",tags:["elbow","joint"]},
+  {id:"elbow-right",x:29,y:36,name:"Coude droit",tags:["elbow","joint"]},
+  {id:"forearm-left",x:18,y:42,name:"Avant-bras gauche",tags:["forearm"]},
+  {id:"forearm-right",x:30,y:42,name:"Avant-bras droit",tags:["forearm"]},
+  {id:"wrist-left",x:17,y:47,name:"Poignet gauche",tags:["wrist","joint"]},
+  {id:"wrist-right",x:31,y:47,name:"Poignet droit",tags:["wrist","joint"]},
+  {id:"hand-left",x:17,y:51,name:"Main gauche",tags:["hand"]},
+  {id:"hand-right",x:31,y:51,name:"Main droite",tags:["hand"]},
+  {id:"fingers-left",x:17,y:55,name:"Doigts gauche",tags:["fingers"]},
+  {id:"fingers-right",x:31,y:55,name:"Doigts droit",tags:["fingers"]},
+  {id:"chest-left",x:23,y:27,name:"Thorax gauche",tags:["thorax"]},
+  {id:"chest-right",x:25,y:27,name:"Thorax droit",tags:["thorax"]},
+  {id:"abdomen-upper",x:24,y:35,name:"Abdomen (haut)",tags:["abdomen"]},
+  {id:"abdomen-lower",x:24,y:43,name:"Abdomen (bas)",tags:["abdomen"]},
+  {id:"groin",x:24,y:52,name:"Entre-jambe",tags:["groin"]},
+  {id:"hip-left",x:22,y:56,name:"Hanche gauche",tags:["hip","joint"]},
+  {id:"hip-right",x:26,y:56,name:"Hanche droite",tags:["hip","joint"]},
+  {id:"thigh-left",x:22,y:64,name:"Cuisse gauche",tags:["thigh"]},
+  {id:"thigh-right",x:26,y:64,name:"Cuisse droite",tags:["thigh"]},
+  {id:"knee-left",x:22,y:71,name:"Genou gauche",tags:["knee","joint"]},
+  {id:"knee-right",x:26,y:71,name:"Genou droit",tags:["knee","joint"]},
+  {id:"leg-left",x:22,y:78,name:"Jambe gauche",tags:["leg"]},
+  {id:"leg-right",x:26,y:78,name:"Jambe droite",tags:["leg"]},
+  {id:"ankle-left",x:22,y:86,name:"Cheville gauche",tags:["ankle","joint"]},
+  {id:"ankle-right",x:26,y:86,name:"Cheville droite",tags:["ankle","joint"]},
+  {id:"foot-left",x:22,y:92,name:"Pied gauche",tags:["foot"]},
+  {id:"foot-right",x:26,y:92,name:"Pied droit",tags:["foot"]},
+
+  // --- DOS ---
+  {id:"head-back",x:74,y:8,name:"Crâne (dos)",tags:["head","back"]},
+  {id:"nape",x:74,y:20,name:"Nuque",tags:["neck","back"]},
+  {id:"scapula-left",x:71,y:26,name:"Omoplate gauche",tags:["shoulder","back"]},
+  {id:"scapula-right",x:77,y:26,name:"Omoplate droite",tags:["shoulder","back"]},
+  {id:"upper-back",x:74,y:32,name:"Dos haut",tags:["back"]},
+  {id:"lower-back",x:74,y:40,name:"Dos bas",tags:["back"]},
+  {id:"buttocks",x:74,y:54,name:"Fessier",tags:["hip","back"]},
+  {id:"hamstring-left",x:72,y:63,name:"Ischio gauche",tags:["thigh","back"]},
+  {id:"hamstring-right",x:76,y:63,name:"Ischio droit",tags:["thigh","back"]},
+  {id:"knee-back-left",x:72,y:70,name:"Creux poplité gauche",tags:["knee","joint","back"]},
+  {id:"knee-back-right",x:76,y:70,name:"Creux poplité droit",tags:["knee","joint","back"]},
+  {id:"calf-left",x:72,y:77,name:"Mollet gauche",tags:["leg","back"]},
+  {id:"calf-right",x:76,y:77,name:"Mollet droit",tags:["leg","back"]},
+  {id:"achilles-left",x:72,y:85,name:"Tendon d’Achille gauche",tags:["ankle","tendon","back"]},
+  {id:"achilles-right",x:76,y:85,name:"Tendon d’Achille droit",tags:["ankle","tendon","back"]},
+  {id:"heel-left",x:72,y:92,name:"Talon gauche",tags:["foot","back"]},
+  {id:"heel-right",x:76,y:92,name:"Talon droit",tags:["foot","back"]}
+];
+
+/* ================================================================
+   PiouPiouMatic RP – Script principal calibré
+   PARTIE 2 : Diagnostic, traitements, positionnement, Code Bleu
 ================================================================ */
 
 /* ---------- Base médicale enrichie ---------- */
 const injuryDatabase = {
   "arme feu": { symptoms:["Plaie pénétrante","Saignement rapide","Brûlure d’entrée/sortie"],
-    treatments:["Compression hémorragique","Voie veineuse","Antibiothérapie IV","Imagerie (radio/scanner)","Suture/extraction selon indication"] },
+    treatments:["Compression hémorragique","Voie veineuse","Antibiothérapie IV","Imagerie (radio/scanner)","Suture/extraction si indication"] },
   "arme blanche": { symptoms:["Lacération","Saignement modéré"],
-    treatments:["Irrigation NaCl","Désinfection","Suture (si berges franches)","Pansement compressif"] },
+    treatments:["Irrigation NaCl","Désinfection","Suture (berges franches)","Pansement compressif"] },
   "contondante": { symptoms:["Hématome","Ecchymose","Douleur locale"],
     treatments:["Glace 15–20 min","Antalgiques palier I–II","Radio si douleur élevée"] },
   "fracture": { symptoms:["Douleur aiguë","Déformation","Perte de mobilité"],
@@ -146,7 +165,7 @@ const injuryDatabase = {
   "entorse": { symptoms:["Gonflement","Douleur articulaire","Instabilité"],
     treatments:["RICE (Repos, Glace, Compression, Élévation)","Immobilisation courte","Antalgiques"] },
   "luxation": { symptoms:["Déformation articulaire","Blocage moteur"],
-    treatments:["Immobilisation stricte","Réduction (médicale)","Radio post-réduction"] },
+    treatments:["Immobilisation stricte","Réduction médicale","Radio post-réduction"] },
   "morsure": { symptoms:["Plaie irrégulière","Risque infectieux"],
     treatments:["Irrigation abondante","Antibioprophylaxie","Vaccination selon statut"] },
   "ecrasement": { symptoms:["Douleur diffuse","Œdème","Risque de syndrome des loges"],
@@ -161,7 +180,8 @@ const injuryDatabase = {
 
 /* ---------- Fonctions contextuelles ---------- */
 function zoneHasTag(z,t){return z&&z.tags&&z.tags.includes(t);}
-function regionOf(z){if(!z)return"Autres";
+function regionOf(z){
+  if(!z)return"Autres";
   const t=z.tags||[];
   if(t.some(v=>["head","eye","jaw","neck"].includes(v)))return"Tête & Cou";
   if(t.some(v=>["shoulder","arm","forearm","elbow","wrist","hand","fingers"].includes(v)))return"Membres supérieurs";
@@ -181,7 +201,7 @@ function applyModifiers(zone,type,pain,symptoms,treatments){
   if(zoneHasTag(zone,"back"))treatments.push("Repos relatif / décontracturants");
 }
 
-/* ---------- Génération du diagnostic ---------- */
+/* ---------- Diagnostic dynamique ---------- */
 function composeDiagnosis(zone,type,pain){
   const zname=zone?zone.name:"zone indéterminée";
   let dx=`Blessure ${zname.toLowerCase()}`;
@@ -193,10 +213,9 @@ function composeDiagnosis(zone,type,pain){
   return`${dx} — ${notes.join(", ")}`;
 }
 
-/* ---------- Génération des traitements ---------- */
+/* ---------- Procédures et traitement détaillés ---------- */
 function generateProcedures(zone,type,pain){
-  const steps=[];
-  const add=(...a)=>a.forEach(s=>{if(!steps.includes(s))steps.push(s);});
+  const steps=[],add=(...a)=>a.forEach(s=>{if(!steps.includes(s))steps.push(s);});
   switch(type){
     case"fracture":add("Immobilisation","Radiographie","Antalgie palier II","Contrôle radio J+10");break;
     case"arme feu":add("Compression hémorragique","Scanner trajectoire","Antibiotiques IV","Avis chirurgical");break;
@@ -207,7 +226,7 @@ function generateProcedures(zone,type,pain){
   return steps.join(" → ");
 }
 
-/* ---------- Moteur d’analyse ---------- */
+/* ---------- Moteur d’analyse et de mise à jour ---------- */
 function updateDiagnosis(){
   const type=injuryType.value;
   const pain=parseInt(painLevel.value,10);
@@ -239,7 +258,7 @@ function positionHotspots(){
     const top=rect.top+rect.height*(py/100)-mapRect.top;
     spot.style.left=left+"px";
     spot.style.top=top+"px";
-    const base=35,scale=Math.min(scaleX,scaleY);
+    const base=28,scale=Math.min(scaleX,scaleY);
     spot.style.width=base*scale+"px";
     spot.style.height=base*scale+"px";
   });
@@ -247,7 +266,7 @@ function positionHotspots(){
 window.addEventListener("load",()=>{autoAlignHotspots();positionHotspots();});
 window.addEventListener("resize",()=>{autoAlignHotspots();positionHotspots();});
 
-/* ---------- Code Bleu ---------- */
+/* ---------- Code Bleu (événement rare) ---------- */
 function triggerCodeBlue(){
   const overlay=document.createElement("div");
   overlay.className="code-blue-overlay";
@@ -268,8 +287,8 @@ function triggerCodeBlue(){
 function registerClick(){clickCount++;if(clickCount>=codeBlueThreshold&&Math.random()<0.3)triggerCodeBlue();}
 
 /* ================================================================
-   PiouPiouMatic RP - Script principal
-   PARTIE 3 : Easter Eggs, Modale, Réinitialisation, Calibration, Init
+   PiouPiouMatic RP – Script principal calibré
+   PARTIE 3 : Easter Eggs, Modale, Réinitialisation, Calibration & Init
 ================================================================ */
 
 /* ---------- Easter Eggs ---------- */
@@ -291,7 +310,7 @@ function handleZoneClick(zone, e) {
     return;
   }
 
-  // 💔 Shift + thorax (zones 'chest'/'thorax')
+  // 💔 Shift + thorax
   if (e.shiftKey && (zone.id.includes("chest") || zone.id.includes("thorax"))) {
     activateSoundSystem();
     playSound("heart");
@@ -306,7 +325,7 @@ function handleZoneClick(zone, e) {
     return;
   }
 
-  // 😏 10 clics sur l’entrejambe
+  // 🍆 10 clics sur l’entrejambe
   if (zone.id === "groin") {
     groinClicks++;
     if (groinClicks === 10) {
@@ -334,7 +353,7 @@ function closeModal() {
 }
 closeBtn.addEventListener("click", closeModal);
 
-/* ---------- Sauvegarde & affichage des blessures ---------- */
+/* ---------- Sauvegarde et affichage des blessures ---------- */
 saveBtn.addEventListener("click", () => {
   if (!currentZone) return;
   const injury = {
@@ -393,9 +412,7 @@ function renderInjuries() {
     injuryList.appendChild(groupEl);
   });
 
-  if (total === 0) {
-    injuryList.innerHTML = "<p>Aucune blessure détectée</p>";
-  }
+  if (total === 0) injuryList.innerHTML = "<p>Aucune blessure détectée</p>";
 }
 
 /* ---------- Bouton Réinitialiser ---------- */
@@ -411,7 +428,7 @@ if (resetBtn) {
   });
 }
 
-/* ---------- Mode Calibration (Alt + C) : affiche les étiquettes ---------- */
+/* ---------- Mode Calibration (Alt + C) ---------- */
 let calibrationActive = false;
 document.addEventListener("keydown", (e) => {
   if (e.altKey && e.key.toLowerCase() === "c") toggleCalibration();
@@ -420,7 +437,6 @@ function toggleCalibration() {
   calibrationActive = !calibrationActive;
   document.querySelectorAll(".calib-label").forEach(el => el.remove());
   if (!calibrationActive) return;
-
   zones.forEach((z) => {
     const label = document.createElement("div");
     label.className = "calib-label";
@@ -429,9 +445,26 @@ function toggleCalibration() {
     label.textContent = `${z.name} (${z.x.toFixed(1)}%, ${z.y.toFixed(1)}%)`;
     bodyMap.appendChild(label);
   });
+  setTimeout(positionHotspots, 30);
+}
 
-  // recalcule position des étiquettes après leur insertion
-  setTimeout(positionHotspots, 30); // défini en PARTIE 2
+/* ---------- Mode test visuel (Alt + T) ---------- */
+let testLabels = false;
+document.addEventListener("keydown", e => {
+  if (e.altKey && e.key.toLowerCase() === "t") toggleTestLabels();
+});
+function toggleTestLabels() {
+  testLabels = !testLabels;
+  document.querySelectorAll(".test-label").forEach(l => l.remove());
+  if (!testLabels) return;
+  zones.forEach(z => {
+    const l = document.createElement("div");
+    l.className = "test-label";
+    l.textContent = z.name;
+    l.style.left = `${z.x}%`;
+    l.style.top = `${z.y}%`;
+    bodyMap.appendChild(l);
+  });
 }
 
 /* ---------- Création des hotspots ---------- */
@@ -447,8 +480,8 @@ function createHotspot(zone) {
 
 /* ---------- Initialisation ---------- */
 window.addEventListener("DOMContentLoaded", () => {
-  // Calibration automatique + placement (déjà re-déclenchés sur 'load' et 'resize')
-  autoAlignHotspots();  // PARTIE 1
+  autoAlignHotspots();      // calibration auto
   zones.forEach(z => createHotspot(z));
-  positionHotspots();   // PARTIE 2
+  positionHotspots();       // position dynamique
 });
+
