@@ -35,6 +35,7 @@
   <div id="injury-modal" class="modal hidden">
     <div class="modal-content">
       <h3 id="zone-title">Blessure — </h3>
+
       <label for="injury-type">Type de blessure :</label>
       <select id="injury-type">
         <option value="arme feu">Arme à feu</option>
@@ -51,9 +52,11 @@
         <option value="contondante">Contondante</option>
         <option value="contusion">Contusion</option>
       </select>
+
       <label for="pain-level">Niveau de douleur :</label>
       <input type="range" id="pain-level" min="1" max="10" value="5">
       <span id="pain-value">5</span>/10
+
       <div class="diagnostic-text">
         <p id="diagnosis-text"></p>
         <p id="symptom-text"></p>
@@ -61,6 +64,7 @@
         <p id="advice-text"></p>
         <p id="details-text"></p>
       </div>
+
       <div class="modal-buttons">
         <button id="save-injury">💾 Enregistrer</button>
         <button id="close-modal">❌ Fermer</button>
@@ -68,6 +72,7 @@
     </div>
   </div>
 
+  <!-- Script principal -->
   <script src="script.js" defer></script>
 </body>
 </html>
