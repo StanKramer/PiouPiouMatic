@@ -485,3 +485,43 @@ window.addEventListener("DOMContentLoaded", () => {
   positionHotspots();       // position dynamique
 });
 
+/* ================================================================
+   PiouPiouMatic RP – Script principal calibré
+   PARTIE 4 : Recalibrage dynamique, zoom, stabilité & fin de script
+================================================================ */
+
+/* ---------- Rafraîchissement continu des positions ---------- */
+["resize", "scroll"].forEach(evt => window.addEventListener(evt, positionHotspots));
+
+/* ---------- Gestion du zoom navigateur ---------- */
+if (window.visualViewport) {
+  let lastZoom = window.visualViewport.scale;
+  setInterval(() => {
+    if (window.visualViewport.scale !== lastZoom) {
+      lastZoom = window.visualViewport.scale;
+      autoAlignHotspots();
+      positionHotspots();
+    }
+  }, 300);
+}
+
+/* ---------- Vérification d'image chargée ---------- */
+imgEl.addEventListener("load", () => {
+  autoAlignHotspots();
+  positionHotspots();
+});
+
+/* ---------- Petite animation d’entrée ---------- */
+window.addEventListener("load", () => {
+  document.body.classList.add("ready");
+});
+
+/* ---------- Sécurité : recalage périodique ---------- */
+setInterval(() => {
+  positionHotspots();
+}, 5000);
+
+/* ================================================================
+   ✅ Fin du script principal calibré PiouPiouMatic RP
+   Tous les systèmes sont synchronisés avec body_both.png
+================================================================ */
