@@ -68,6 +68,60 @@ function positionHotspots() {
 
 window.addEventListener("resize", positionHotspots);
 
+/* ================================================================
+   Gestion de la fenêtre de diagnostic (clic sur un hotspot)
+================================================================ */
+function openModal(zone) {
+  modal.classList.remove("hidden");
+  document.getElementById("zone-title").textContent = `Blessure — ${zone.name}`;
+  openModal.currentZone = zone;
+  updateDiagnosis();
+}
+
+function closeModalWindow() {
+  modal.classList.add("hidden");
+  openModal.currentZone = null;
+}
+if (closeBtn) closeBtn.addEventListener("click", closeModalWindow);
+
+/* ================================================================
+   Contenu dynamique du diagnostic
+================================================================ */
+function updateDiagnosis() {
+  const type = injuryType.value;
+  const pain = parseInt(painLevel.value, 10);
+  diagnosisText.textContent = `Atteinte de type ${type} — douleur ${pain}/10`;
+  symptomText.textContent = "Douleur localisée, inflammation probable.";
+  const care = CARE_BY_TYPE?.[type]?.care || "Antalgique, désinfection, repos.";
+  const advice = CARE_BY_TYPE?.[type]?.advice || "Suivi à l’Ocean Medical Center si persistant.";
+  treatmentText.textContent = `Soin : ${care}`;
+  adviceText.textContent = `Recommandation : ${advice}`;
+  detailsText.textContent = "Procédure : nettoyage, contrôle douleur, imagerie si nécessaire.";
+}
+painLevel.addEventListener("input", () => {
+  painValue.textContent = painLevel.value;
+  updateDiagnosis();
+});
+injuryType.addEventListener("change", updateDiagnosis);
+
+/* ================================================================
+   Enregistrement de la blessure
+================================================================ */
+const injuries = [];
+saveBtn.addEventListener("click", () => {
+  const zone = openModal.currentZone;
+  if (!zone) return;
+  const type = injuryType.value;
+  const pain = parseInt(painLevel.value, 10);
+  const care = CARE_BY_TYPE?.[type]?.care || "Antalgique, désinfection, repos.";
+  const advice = CARE_BY_TYPE?.[type]?.advice || "Suivi à l’Ocean Medical Center si persistant.";
+  injuries.unshift({
+    zone: zone.name, id: zone.id, tags: zone.tags,
+    type, pain, ts: Date.now(), care, advice
+  });
+  closeModalWindow();
+  renderSummary();
+});
 
 /* ---------- Coordonnées hotspots ---------- */
 let ZONES = [
