@@ -7,10 +7,13 @@
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <!-- Interrupteur sonore -->
   <button id="sound-toggle" title="Activer/Désactiver le son" class="sound-btn">🔇</button>
-
-  <h1 class="title">🩺 PiouPiouMatic — Interface de diagnostic RP</h1>
+  <header class="header">
+    <img src="logo_pioupioumatic.png" alt="PiouPiouMatic Logo" class="logo">
+    <div class="system-status">
+      <span id="status-text">🟢 Système prêt — En attente de diagnostic</span>
+    </div>
+  </header>
 
   <main>
     <section id="body-map">
@@ -25,11 +28,9 @@
     </aside>
   </main>
 
-  <!-- Fenêtre modale -->
   <div id="injury-modal" class="modal hidden" aria-hidden="true" role="dialog">
     <div class="modal-content">
       <h3 id="zone-title">Nouvelle blessure</h3>
-
       <label for="injury-type">Type de blessure :</label>
       <select id="injury-type">
         <option value="arme feu">Arme à feu</option>
@@ -45,43 +46,20 @@
         <option value="avp">Accident de véhicule</option>
         <option value="chute">Chute</option>
       </select>
-
       <label for="pain-level">Douleur (1–10) :</label>
       <input type="range" id="pain-level" min="1" max="10" value="5"/>
       <span id="pain-value">5</span>
-
-      <div class="diagnosis">
-        <strong>Diagnostic :</strong>
-        <p id="diagnosis-text">—</p>
-      </div>
-
-      <div class="symptoms">
-        <strong>Symptômes :</strong>
-        <p id="symptom-text">—</p>
-      </div>
-
-      <div class="treatment">
-        <strong>Traitement :</strong>
-        <p id="treatment-text">—</p>
-      </div>
-
-      <div class="advice">
-        <strong>Conseils :</strong>
-        <p id="advice-text">—</p>
-      </div>
-
-      <div class="advanced-details">
-        <strong>Détails avancés :</strong>
-        <p id="details-text" class="fade-in">—</p>
-      </div>
-
+      <div class="diagnosis"><strong>Diagnostic :</strong><p id="diagnosis-text">—</p></div>
+      <div class="symptoms"><strong>Symptômes :</strong><p id="symptom-text">—</p></div>
+      <div class="treatment"><strong>Traitement :</strong><p id="treatment-text">—</p></div>
+      <div class="advice"><strong>Conseils :</strong><p id="advice-text">—</p></div>
+      <div class="advanced-details"><strong>Détails avancés :</strong><p id="details-text" class="fade-in">—</p></div>
       <div class="buttons">
         <button id="close-modal">Annuler</button>
         <button id="save-injury" class="primary">Ajouter</button>
       </div>
     </div>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
